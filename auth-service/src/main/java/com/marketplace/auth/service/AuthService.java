@@ -2,28 +2,43 @@ package com.marketplace.auth.service;
 
 import com.marketplace.auth.model.Credential;
 import com.marketplace.auth.repository.CredentialRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.marketplace.auth.dto.CredentialRequest;
+import com.marketplace.auth.dto.CredentialResponse;
 
 @Service
 public class AuthService {
 
     private final CredentialRepository credentialRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(CredentialRepository credentialRepository) {
+    public AuthService(CredentialRepository credentialRepository, PasswordEncoder passwordEncoder) {
         this.credentialRepository = credentialRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String mensaje() {
         return "Hola desde Auth Service - capa Service";
     }
 
-    public Credential crearCredential() {
+    public CredentialResponse crearCredential(CredentialRequest request) {
 
         Credential credential = new Credential();
 
-        credential.setUserId(1L);
-        credential.setPasswordHash("hash-de-prueba");
+        credential.setUserId(request.getUserId());
 
-        return credentialRepository.save(credential);
+        credential.setPasswordHash(
+                passwordEncoder.encode(request.getPassword())
+        );
+
+        Credential credentialGuardada = credentialRepository.save(credential);
+
+        CredentialResponse response = new CredentialResponse();
+
+        response.setId(credentialGuardada.getId());
+        response.setUserId(credentialGuardada.getUserId());
+
+        return response;
     }
 }
