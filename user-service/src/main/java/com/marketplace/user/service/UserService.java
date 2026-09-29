@@ -40,4 +40,12 @@ public class UserService {
                         "El usuario no existe"
                 ));
     }
+
+    public User obtenerUsuarioPorEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "El usuario no existe"
+                ));
+    }
 }

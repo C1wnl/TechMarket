@@ -5,7 +5,6 @@ import com.marketplace.user.model.User;
 import com.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -36,5 +35,9 @@ public class UserController {
     @GetMapping("/{id}")
     public User obtenerUsuarioPorId(@PathVariable Long id) {
         return userService.obtenerUsuarioPorId(id);
+    }
+    @GetMapping("/email")
+    public User obtenerUsuarioPorEmail(@RequestParam String email) {
+        return userService.obtenerUsuarioPorEmail(email);
     }
 }
