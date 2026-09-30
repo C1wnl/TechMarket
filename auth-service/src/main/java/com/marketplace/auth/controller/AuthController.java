@@ -1,52 +1,55 @@
 package com.marketplace.auth.controller;
-import com.marketplace.auth.client.UserClient;
-import com.marketplace.auth.dto.CredentialRequest;
-import com.marketplace.auth.dto.CredentialResponse;
-import com.marketplace.auth.dto.UserResponse;
-import com.marketplace.auth.model.Credential;
+
+import com.marketplace.auth.dto.CurrentUserResponse;
+import com.marketplace.auth.dto.LoginRequest;
+import com.marketplace.auth.dto.LoginResponse;
+import com.marketplace.auth.dto.RegisterRequest;
+import com.marketplace.auth.dto.RegisterResponse;
 import com.marketplace.auth.service.AuthService;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.*;
-import com.marketplace.auth.dto.LoginRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class AuthController {
 
     private final AuthService authService;
-    private final UserClient userClient;
 
-    public AuthController(AuthService authService, UserClient userClient) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.userClient = userClient;
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return authService.mensaje();
+    @PostMapping("/register")
+    public RegisterResponse registrar(
+            @Valid @RequestBody RegisterRequest request) {
+
+        return authService.registrar(request);
     }
 
-    /*
-    @GetMapping("/credential/test")
-    public Credential crearCredential() {
-        return authService.crearCredential();
-    }
-    */
-
-    @PostMapping("/credential")
-    public CredentialResponse crearCredential(
-            @Valid @RequestBody CredentialRequest request) {
-
-        return authService.crearCredential(request);
-    }
-
-    @GetMapping("/test-user")
-    public UserResponse obtenerUsuarioPorEmail(@RequestParam String email) {
-        return userClient.obtenerUsuarioPorEmail(email);
-    }
-
-    @PostMapping("/login-test")
-    public boolean loginTest(@RequestBody LoginRequest request) {
-
+    @PostMapping("/login")
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.autenticar(request);
+    }
+
+    @GetMapping("/me")
+    public CurrentUserResponse usuarioActual(
+            Authentication authentication) {
+
+        CurrentUserResponse response = new CurrentUserResponse();
+
+        response.setUserId(Long.valueOf(authentication.getName()));
+
+        response.setRol(
+                authentication.getAuthorities()
+                        .iterator()
+                        .next()
+                        .getAuthority()
+                        .replace("ROLE_", "")
+        );
+
+        return response;
     }
 }

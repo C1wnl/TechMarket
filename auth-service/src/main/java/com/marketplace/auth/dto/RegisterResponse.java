@@ -1,16 +1,16 @@
 package com.marketplace.auth.dto;
 
-public class CredentialResponse {
+public class RegisterResponse {
 
-    private Long id;
+    private String message;
     private Long userId;
 
-    public Long getId() {
-        return id;
+    public String getMessage() {
+        return message;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public Long getUserId() {
