@@ -26,7 +26,7 @@ if (registerForm) {
 
         }
 
-        fetch("http://localhost:8081/register", {
+        fetch("http://localhost:8080/auth/register", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -80,7 +80,7 @@ if (loginForm) {
         const email = document.querySelector("#email").value;
         const password = document.querySelector("#password").value;
 
-        fetch("http://localhost:8081/login", {
+        fetch("http://localhost:8080/auth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
