@@ -1,0 +1,21 @@
+name: techmarket-payment
+
+services:
+  payment-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: payment-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5437:5432"
+    volumes:
+      - payment-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payment-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  payment-data:

@@ -1,0 +1,15 @@
+services:
+  notification-db:
+    image: postgres:16
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: techmarket_local
+    ports:
+      - "5438:5432"
+    volumes:
+      - notification_data:/var/lib/postgresql/data
+
+volumes:
+  notification_data:
