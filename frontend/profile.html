@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mi perfil | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/auth.js" defer></script>
+    <script src="js/profile.js" defer></script>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+
+        <a href="index.html" class="logo">TechMarket</a>
+
+        <nav class="profile-nav">
+            <a href="index.html" class="profile-back-link">
+                 Volver a la tienda
+            </a>
+
+            <button
+                    id="logout-button"
+                    class="logout-button"
+                    type="button">
+                Cerrar sesión
+            </button>
+        </nav>
+
+    </div>
+</header>
+
+<main class="profile-container">
+
+    <section class="profile-heading">
+        <p class="profile-eyebrow">TU CUENTA TECHMARKET</p>
+
+        <h1>Mi perfil<span>.</span></h1>
+
+        <p>
+            Consulta la información de tu cuenta y administra
+            tu experiencia en TechMarket.
+        </p>
+    </section>
+
+    <section class="profile-layout">
+
+        <aside class="profile-sidebar">
+
+            <div class="profile-avatar" id="profile-avatar">
+                U
+            </div>
+
+            <h2 id="profile-display-name">Mi cuenta</h2>
+
+            <p id="profile-email">Información de la cuenta</p>
+
+            <span class="profile-role" id="profile-role">
+                Verificando rol...
+            </span>
+
+            <div class="profile-sidebar-divider"></div>
+
+            <a href="index.html" class="profile-sidebar-link active">
+                <span>01</span>
+                Mi información
+            </a>
+
+            <div class="profile-sidebar-link profile-link-disabled">
+                <span>02</span>
+                Mis pedidos
+                <small>Próximamente</small>
+            </div>
+
+        </aside>
+
+        <div class="profile-content">
+
+            <section class="profile-panel">
+
+                <div class="profile-panel-heading">
+                    <div>
+                        <p class="profile-section-label">INFORMACIÓN PERSONAL</p>
+                        <h2>Datos de tu cuenta</h2>
+                    </div>
+
+                    <span class="profile-lock">Cuenta protegida</span>
+                </div>
+
+                <p class="profile-description">
+                    Esta es la información disponible de tu sesión actual.
+                    Los datos personales se mostrarán cuando conectemos
+                    completamente el perfil con User Service.
+                </p>
+
+                <div class="profile-fields">
+
+                    <div class="profile-field">
+                        <span>Identificador de usuario</span>
+                        <p id="profile-user-id">Cargando...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <span>Rol de la cuenta</span>
+                        <p id="profile-user-role">Cargando...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <span>Estado de la sesión</span>
+                        <p class="profile-session-status">
+                            <span></span>
+                            Sesión verificada
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="profile-panel profile-orders-panel">
+
+                <div class="profile-panel-heading">
+                    <div>
+                        <p class="profile-section-label">TU ACTIVIDAD</p>
+                        <h2>Mis pedidos</h2>
+                    </div>
+                </div>
+
+                <div class="profile-empty-state">
+                    <div class="profile-empty-icon">□</div>
+
+                    <h3>Tu actividad aparecerá aquí</h3>
+
+                    <p>
+                        Cuando conectemos el microservicio de pedidos,
+                        podrás consultar tus compras desde esta sección.
+                    </p>
+
+                    <a href="index.html" class="profile-store-link">
+                        Volver a la tienda
+                    </a>
+                </div>
+
+            </section>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -139,18 +139,36 @@ if (logoutButton) {
 
 }
 
+
 // ============================
-// ESTADO DE SESIÓN
+// ESTADO DE SESIÓN Y ROL
 // ============================
 
 const token = localStorage.getItem("token");
 
 const loginLink = document.querySelector("#login-link");
 const registerLink = document.querySelector("#register-link");
-const sessionMessage = document.querySelector("#session-message");
+const accountLink = document.querySelector("#account-link");
 
-if (token) {
+function mostrarInvitado() {
+    if (loginLink) {
+        loginLink.style.display = "inline";
+    }
 
+    if (registerLink) {
+        registerLink.style.display = "inline-block";
+    }
+
+    if (accountLink) {
+        accountLink.style.display = "none";
+    }
+
+    if (logoutButton) {
+        logoutButton.style.display = "none";
+    }
+}
+
+function mostrarUsuario(rol) {
     if (loginLink) {
         loginLink.style.display = "none";
     }
@@ -159,22 +177,56 @@ if (token) {
         registerLink.style.display = "none";
     }
 
-    if (sessionMessage) {
-        sessionMessage.style.display = "inline";
+    if (accountLink) {
+        if (rol === "ADMIN") {
+            accountLink.textContent = "Panel de administrador";
+            accountLink.href = "admin-dashboard.html";
+        } else {
+            accountLink.textContent = "Mi perfil";
+            accountLink.href = "profile.html";
+        }
+
+        accountLink.style.display = "inline-block";
     }
 
     if (logoutButton) {
         logoutButton.style.display = "inline-block";
     }
-
-} else {
-
-    if (sessionMessage) {
-        sessionMessage.style.display = "none";
-    }
-
-    if (logoutButton) {
-        logoutButton.style.display = "none";
-    }
-
 }
+
+async function verificarSesion() {
+    if (!token) {
+        mostrarInvitado();
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "http://localhost:8080/auth/me",
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("La sesión no es válida.");
+        }
+
+        const usuario = await response.json();
+
+        mostrarUsuario(usuario.rol);
+
+    } catch (error) {
+        localStorage.removeItem("token");
+        mostrarInvitado();
+
+        console.error("No se pudo verificar la sesión:", error);
+    }
+}
+
+verificarSesion();
+
+
