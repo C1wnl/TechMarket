@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <a href="index.html" class="logo">TechMarket</a>
+
+    <nav class="nav-links">
+        <a href="#productos">Productos</a>
+        <a href="#carrito">Mi pedido</a>
+        <a href="#nosotros">Nosotros</a>
+    </nav>
+
+    <div class="nav-actions">
+        <a href="login.html" class="login-link" id="login-link">
+            Iniciar sesión
+        </a>
+
+        <a href="register.html" class="register-button" id="register-link">
+            Crear cuenta
+        </a>
+
+        <a href="profile.html" class="register-button" id="account-link" hidden>
+            Mi perfil
+        </a>
+
+        <button
+                id="logout-button"
+                class="logout-button"
+                type="button"
+                hidden
+        >
+            Cerrar sesión
+        </button>
+    </div>
+
+</header>
+
+
+<main>
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <p class="hero-tag">MARKETPLACE TECNOLÓGICO</p>
+
+            <h1>
+                Tecnología que quieres.
+                <span>Todo en un solo lugar.</span>
+            </h1>
+
+            <p class="hero-description">
+                Descubre productos tecnológicos, encuentra lo que necesitas
+                y disfruta de una experiencia sencilla y segura.
+            </p>
+
+            <div class="hero-actions">
+                <a href="#productos" class="primary-button">Explorar productos</a>
+                <a href="#nosotros" class="secondary-button">Conocer más</a>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="products-section" id="productos">
+
+        <div class="section-header">
+
+            <div>
+                <p class="section-tag">SELECCIÓN TECHMARKET</p>
+                <h2>Encuentra tu próximo equipo</h2>
+            </div>
+
+            <button class="view-all text-button" id="refresh-products" type="button">Actualizar catálogo →</button>
+
+        </div>
+
+
+        <p id="catalog-message" class="feedback" role="status" aria-live="polite">Cargando catálogo…</p>
+        <div class="product-grid" id="product-grid"></div>
+
+    </section>
+
+    <section class="products-section cart-section" id="carrito">
+        <div class="section-header">
+            <div><p class="section-tag">TU SELECCIÓN</p><h2>Mi pedido</h2></div>
+            <a class="view-all" href="profile.html#mis-pedidos">Ver mis pedidos →</a>
+        </div>
+        <div class="cart-panel">
+            <div id="cart-items"></div>
+            <div class="cart-summary">
+                <p>Total estimado <strong id="cart-total">$0.00</strong></p>
+                <p class="muted">El precio y la disponibilidad se verifican al confirmar. Crear el pedido no realiza ningún cobro ni reserva existencias.</p>
+                <button id="create-order" type="button" class="primary-button" disabled>Crear pedido</button>
+            </div>
+        </div>
+        <p id="cart-message" class="feedback" role="status" aria-live="polite"></p>
+    </section>
+</main>
+
+<footer class="footer" id="nosotros">
+
+    <div class="footer-content">
+
+        <div class="footer-brand">
+            <h2>TechMarket</h2>
+            <p>
+                Tu marketplace tecnológico.
+                Tecnología que quieres, todo en un solo lugar.
+            </p>
+        </div>
+
+        <div class="footer-links">
+
+            <a href="#productos">Productos</a>
+            <a href="#carrito">Mi pedido</a>
+            <a href="#nosotros">Nosotros</a>
+
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/catalog.js"></script>
+
+</body>
+</html>
+

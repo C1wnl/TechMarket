@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Panel de administración | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/config.js" defer></script>
+    <script src="js/api.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/admin-dashboard.js" defer></script>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+
+        <a href="index.html" class="logo">TechMarket</a>
+
+        <div class="nav-actions">
+            <span id="admin-name">Administrador</span>
+
+            <button
+                    id="logout-button"
+                    class="logout-button"
+                    type="button">
+                Cerrar sesión
+            </button>
+        </div>
+
+    </div>
+</header>
+
+<main class="admin-container">
+
+    <section class="admin-welcome">
+        <p class="admin-label">ADMINISTRACIÓN</p>
+
+        <h1>
+            Tu plataforma.
+            <span>Tu control.</span>
+        </h1>
+
+        <p>
+            Administra las áreas principales de TechMarket
+            desde un solo lugar.
+        </p>
+    </section>
+
+    <section class="admin-section" id="admin-tools" hidden>
+
+        <div class="admin-section-header">
+            <div>
+                <p class="admin-section-tag">GESTIÓN DE LA PLATAFORMA</p>
+                <h2>Centro de administración</h2>
+            </div>
+
+            <span class="admin-role">
+                <span class="admin-status-dot"></span>
+                Administrador
+            </span>
+        </div>
+
+        <div class="admin-grid">
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 4v2"/></svg></div>
+                    <span class="admin-card-number">01</span>
+                </div>
+
+                <h3>Usuarios</h3>
+
+                <p>
+                    Consulta las cuentas registradas y prepara
+                    la gestión de usuarios de la plataforma.
+                </p>
+
+                <button class="admin-card-button" type="button" disabled>
+                    Próximamente
+                    <span>→</span>
+                </button>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm-9 5 9 5 9-5M12 13v9M7 5.8l9 5"/></svg></div>
+                    <span class="admin-card-number">02</span>
+                </div>
+
+                <h3>Productos</h3>
+
+                <p>
+                    Agrega productos al catálogo y consulta sus precios y existencias.
+                </p>
+
+                <a class="admin-card-button" href="#gestion-productos">Gestionar productos<span>→</span></a>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l3 12h11l2-9H6"/><circle cx="9" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg></div>
+                    <span class="admin-card-number">03</span>
+                </div>
+
+                <h3>Pedidos</h3>
+
+                <p>
+                    Consulta los pedidos, sus productos y los totales calculados.
+                </p>
+
+                <a class="admin-card-button" href="#gestion-pedidos">Consultar pedidos<span>→</span></a>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3v18h17M8 17v-5M13 17V7M18 17V4"/></svg></div>
+                    <span class="admin-card-number">04</span>
+                </div>
+
+                <h3>Resumen</h3>
+
+                <p>
+                    Prepara una vista general de la actividad
+                    y los indicadores de TechMarket.
+                </p>
+
+                <button class="admin-card-button" type="button" disabled>
+                    Próximamente
+                    <span>→</span>
+                </button>
+            </article>
+
+        </div>
+    </section>
+
+    <section class="admin-note">
+        <div class="admin-note-icon">i</div>
+
+        <div>
+            <h3>Espacio de administración</h3>
+            <p>
+                Las herramientas se habilitarán progresivamente
+                a medida que conectemos los microservicios.
+            </p>
+        </div>
+    </section>
+
+    <p id="admin-access-message" class="feedback" role="status" aria-live="polite">Verificando acceso…</p>
+    <div id="admin-data" hidden>
+        <section class="management-panel" id="gestion-productos">
+            <div class="section-header"><div><p class="section-tag">CATÁLOGO</p><h2>Productos</h2></div>
+                <button id="admin-refresh-products" class="text-button" type="button">Actualizar →</button></div>
+            <form id="product-form" class="product-form">
+                <div class="form-group"><label for="product-name">Nombre</label><input id="product-name" maxlength="100" required></div>
+                <div class="form-group"><label for="product-price">Precio (MXN)</label><input id="product-price" type="number" min="0.01" max="9999999999.99" step="0.01" required></div>
+                <div class="form-group"><label for="product-stock">Existencias</label><input id="product-stock" type="number" min="0" max="2147483647" step="1" required></div>
+                <div class="form-group product-description-field"><label for="product-description">Descripción</label><textarea id="product-description" maxlength="500" rows="3"></textarea></div>
+                <button type="submit" class="primary-button">Guardar producto</button>
+            </form>
+            <p id="product-message" class="feedback" role="status" aria-live="polite"></p>
+            <div class="table-wrap"><table><caption class="sr-only">Catálogo de productos</caption><thead><tr><th>ID</th><th>Producto</th><th>Precio</th><th>Stock</th></tr></thead><tbody id="admin-products"></tbody></table></div>
+        </section>
+        <section class="management-panel" id="gestion-pedidos">
+            <div class="section-header"><div><p class="section-tag">ACTIVIDAD</p><h2>Pedidos</h2></div>
+                <button id="admin-refresh-orders" class="text-button" type="button">Actualizar →</button></div>
+            <p id="admin-orders-message" class="feedback" role="status" aria-live="polite"></p>
+            <div id="admin-orders" class="orders-list"></div>
+        </section>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>
