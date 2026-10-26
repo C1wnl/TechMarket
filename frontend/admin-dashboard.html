@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,7 +63,7 @@
             </span>
         </div>
 
-        <div class="admin-grid">
+        <div class="admin-grid" id="admin-grid">
 
             <article class="admin-card">
                 <div class="admin-card-top">
@@ -73,12 +74,15 @@
                 <h3>Usuarios</h3>
 
                 <p>
-                    Consulta las cuentas registradas y prepara
-                    la gestión de usuarios de la plataforma.
+                    Consulta las cuentas registradas y revisa
+                    la información de los usuarios de la plataforma.
                 </p>
 
-                <button class="admin-card-button" type="button" disabled>
-                    Próximamente
+                <button
+                        id="show-users-button"
+                        class="admin-card-button"
+                        type="button">
+                    Gestionar usuarios
                     <span>→</span>
                 </button>
             </article>
@@ -141,9 +145,57 @@
             </article>
 
         </div>
+
+        <!-- Panel de gestión de usuarios -->
+        <section id="users-panel" class="admin-section" hidden>
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">GESTIÓN DE CUENTAS</p>
+                    <h2>Usuarios registrados</h2>
+                    <p id="users-count">Preparando listado...</p>
+                </div>
+
+                <button
+                        id="refresh-users-button"
+                        class="logout-button"
+                        type="button">
+                    Actualizar lista
+                </button>
+            </div>
+
+            <p id="users-message" role="status" aria-live="polite">
+                Selecciona la opción para consultar los usuarios.
+            </p>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo electrónico</th>
+                        <th>Rol</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <button
+                    id="back-to-admin-button"
+                    class="logout-button"
+                    type="button">
+                ← Volver al panel
+            </button>
+
+        </section>
+
     </section>
 
-    <section class="admin-note">
+    <section class="admin-note" id="admin-note">
         <div class="admin-note-icon">i</div>
 
         <div>

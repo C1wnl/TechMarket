@@ -1507,3 +1507,229 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* =========================
+   ADMIN - GESTIÓN DE USUARIOS
+   ========================= */
+
+/* Panel de usuarios */
+
+#users-panel {
+    margin-top: 38px;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 14px;
+    animation: users-panel-appear 0.25s ease;
+}
+
+@keyframes users-panel-appear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#users-panel .admin-section-header {
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+#users-panel .admin-section-header h2 {
+    margin-bottom: 10px;
+}
+
+#users-count {
+    color: #777777;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Mensajes de estado */
+
+#users-message {
+    margin-bottom: 18px;
+    color: #666666;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Contenedor con desplazamiento horizontal en pantallas pequeñas */
+
+.users-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+/* Tabla */
+
+.users-table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.users-table thead {
+    background: #f7f7f7;
+}
+
+.users-table th {
+    padding: 16px 18px;
+    color: #777777;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.users-table td {
+    padding: 17px 18px;
+    color: #444444;
+    border-bottom: 1px solid #eeeeee;
+    line-height: 1.6;
+}
+
+.users-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.users-table tbody tr:hover {
+    background: #fafafa;
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table td:first-child {
+    color: #888888;
+    font-variant-numeric: tabular-nums;
+}
+
+.users-table td:nth-child(2) {
+    color: #111111;
+    font-weight: 600;
+}
+
+.users-table td:nth-child(3) {
+    overflow-wrap: anywhere;
+}
+
+/* Etiqueta del rol */
+
+.user-role-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border: 1px solid #e2e2e2;
+    border-radius: 6px;
+    background: #f7f7f7;
+    color: #333333;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+/* Botones de la gestión */
+
+#show-users-button {
+    background: #111111;
+    border-color: #111111;
+    color: #ffffff;
+    cursor: pointer;
+    transition:
+            background 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+#show-users-button:hover {
+    background: #333333;
+    border-color: #333333;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+#show-users-button:focus-visible,
+#users-panel button:focus-visible {
+    outline: 2px solid #555555;
+    outline-offset: 3px;
+}
+
+#users-panel > #back-to-admin-button {
+    margin-top: 22px;
+}
+
+/* Estado sin datos */
+
+#users-table-body:empty {
+    border: none;
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+    #users-panel {
+        padding: 24px 20px;
+    }
+
+    #users-panel .admin-section-header {
+        align-items: flex-start;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 520px) {
+    #users-panel {
+        margin-top: 25px;
+        padding: 20px 14px;
+        border-radius: 10px;
+    }
+
+    #users-panel .admin-section-header {
+        gap: 18px;
+    }
+
+    #users-panel .admin-section-header h2 {
+        font-size: 23px;
+    }
+
+    #refresh-users-button,
+    #back-to-admin-button {
+        width: 100%;
+    }
+
+    #users-panel > #back-to-admin-button {
+        margin-top: 18px;
+    }
+
+    .users-table {
+        min-width: 520px;
+        font-size: 12px;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 13px 12px;
+    }
+}
