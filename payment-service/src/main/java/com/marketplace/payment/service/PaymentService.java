@@ -1,14 +1,22 @@
 
 package com.marketplace.payment.service;
 
-import com.marketplace.payment.client.NotificationClient;
 import com.marketplace.payment.model.Payment;
 import com.marketplace.payment.repository.PaymentRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.marketplace.payment.event.PaymentEvent;
+import com.marketplace.payment.outbox.PaymentOutboxEvent;
+import com.marketplace.payment.outbox.PaymentOutboxRepository;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import tools.jackson.databind.json.JsonMapper;
+
+import java.time.Instant;
+import java.util.UUID;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -23,15 +31,21 @@ public class PaymentService {
             "CANCELADO"
     );
 
+
     private final PaymentRepository paymentRepository;
-    private final NotificationClient notificationClient;
+    private final PaymentOutboxRepository outboxRepository;
+    private final JsonMapper jsonMapper;
 
     public PaymentService(
             PaymentRepository paymentRepository,
-            NotificationClient notificationClient) {
+            PaymentOutboxRepository outboxRepository,
+            JsonMapper jsonMapper) {
+
         this.paymentRepository = paymentRepository;
-        this.notificationClient = notificationClient;
+        this.outboxRepository = outboxRepository;
+        this.jsonMapper = jsonMapper;
     }
+
 
     public Payment crearPago(Payment payment) {
         payment.setEstado("PENDIENTE");
@@ -59,6 +73,8 @@ public class PaymentService {
     }
 
 
+
+    @Transactional
     public Payment actualizarEstado(Long id, String estado) {
 
         if (estado == null || estado.isBlank()) {
@@ -68,53 +84,78 @@ public class PaymentService {
             );
         }
 
-        String nuevoEstado = estado.trim().toUpperCase(Locale.ROOT);
+        String nuevoEstado =
+                estado.trim().toUpperCase(Locale.ROOT);
 
         if (!ESTADOS_VALIDOS.contains(nuevoEstado)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Estado no válido. Use: PENDIENTE, APROBADO, RECHAZADO o CANCELADO"
+                    "Estado no válido"
             );
         }
 
         Payment payment = obtenerPagoPorId(id);
         String estadoActual = payment.getEstado();
 
-        // Evitar actualizaciones y notificaciones duplicadas
         if (nuevoEstado.equals(estadoActual)) {
             return payment;
         }
 
-        // No permitir cambios desde estados finales
         if (Set.of("APROBADO", "RECHAZADO", "CANCELADO")
                 .contains(estadoActual)) {
-
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "No se puede modificar un pago con estado final: "
-                            + estadoActual
+                    "No se puede modificar un pago finalizado"
             );
         }
 
-        // Solo permitir transiciones desde PENDIENTE
         if (!"PENDIENTE".equals(estadoActual)) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Transición de estado no permitida"
+                    "Transición no permitida"
             );
         }
 
         payment.setEstado(nuevoEstado);
-
-        Payment pagoActualizado = paymentRepository.save(payment);
+        Payment pagoActualizado =
+                paymentRepository.save(payment);
 
         if ("APROBADO".equals(nuevoEstado)
                 || "RECHAZADO".equals(nuevoEstado)) {
 
-            notificationClient.notificarCambioDePago(pagoActualizado);
+            String eventType =
+                    "APROBADO".equals(nuevoEstado)
+                            ? "PAYMENT_APPROVED"
+                            : "PAYMENT_REJECTED";
+
+            String eventId = UUID.randomUUID().toString();
+
+            PaymentEvent evento = new PaymentEvent(
+                    eventId,
+                    eventType,
+                    pagoActualizado.getId(),
+                    pagoActualizado.getOrderId(),
+                    pagoActualizado.getUserId(),
+                    pagoActualizado.getMonto(),
+                    nuevoEstado,
+                    Instant.now().toString()
+            );
+
+            String payload =
+                    jsonMapper.writeValueAsString(evento);
+
+            PaymentOutboxEvent outbox =
+                    new PaymentOutboxEvent(
+                            eventId,
+                            pagoActualizado.getId(),
+                            payload
+                    );
+
+            outboxRepository.save(outbox);
         }
 
         return pagoActualizado;
     }
+
 
 }
