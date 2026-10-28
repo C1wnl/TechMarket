@@ -1,14 +1,18 @@
 package com.marketplace.auth.service;
 
-import com.marketplace.auth.model.Credential;
-import com.marketplace.auth.repository.CredentialRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import com.marketplace.auth.dto.CredentialRequest;
-import com.marketplace.auth.dto.CredentialResponse;
 import com.marketplace.auth.client.UserClient;
 import com.marketplace.auth.dto.LoginRequest;
+import com.marketplace.auth.dto.LoginResponse;
+import com.marketplace.auth.dto.RegisterRequest;
+import com.marketplace.auth.dto.RegisterResponse;
+import com.marketplace.auth.dto.RegisterUserRequest;
 import com.marketplace.auth.dto.UserResponse;
+import com.marketplace.auth.model.Credential;
+import com.marketplace.auth.repository.CredentialRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AuthService {
@@ -16,15 +20,18 @@ public class AuthService {
     private final CredentialRepository credentialRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserClient userClient;
+    private final JwtService jwtService;
 
-    public AuthService(CredentialRepository credentialRepository, PasswordEncoder passwordEncoder, UserClient userClient) {
+    public AuthService(
+            CredentialRepository credentialRepository,
+            PasswordEncoder passwordEncoder,
+            UserClient userClient,
+            JwtService jwtService) {
+
         this.credentialRepository = credentialRepository;
         this.passwordEncoder = passwordEncoder;
         this.userClient = userClient;
-    }
-
-    public String mensaje() {
-        return "Hola desde Auth Service - capa Service";
+        this.jwtService = jwtService;
     }
 
     public UserResponse buscarUsuarioParaLogin(LoginRequest request) {
@@ -35,42 +42,72 @@ public class AuthService {
     public Credential buscarCredentialParaLogin(Long userId) {
 
         return credentialRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Las credenciales no existen"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Correo o contraseña incorrectos"
+                ));
     }
 
-    public boolean verificarPassword(String password, String passwordHash) {
+    public boolean verificarPassword(
+            String password,
+            String passwordHash) {
 
         return passwordEncoder.matches(password, passwordHash);
     }
 
-    public boolean autenticar(LoginRequest request) {
+    public LoginResponse autenticar(LoginRequest request) {
 
         UserResponse user = buscarUsuarioParaLogin(request);
 
         Credential credential = buscarCredentialParaLogin(user.getId());
 
-        return verificarPassword(
+        if (!verificarPassword(
                 request.getPassword(),
-                credential.getPasswordHash()
+                credential.getPasswordHash())) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Correo o contraseña incorrectos"
+            );
+        }
+
+        String token = jwtService.generarToken(
+                user.getId(),
+                user.getRol()
         );
+
+        LoginResponse response = new LoginResponse();
+
+        response.setToken(token);
+        response.setUserId(user.getId());
+        response.setRol(user.getRol());
+
+        return response;
     }
 
-    public CredentialResponse crearCredential(CredentialRequest request) {
+    public RegisterResponse registrar(RegisterRequest request) {
+
+        RegisterUserRequest userRequest = new RegisterUserRequest();
+
+        userRequest.setNombre(request.getNombre());
+        userRequest.setEmail(request.getEmail());
+
+        UserResponse user = userClient.crearUsuario(userRequest);
 
         Credential credential = new Credential();
 
-        credential.setUserId(request.getUserId());
+        credential.setUserId(user.getId());
 
         credential.setPasswordHash(
                 passwordEncoder.encode(request.getPassword())
         );
 
-        Credential credentialGuardada = credentialRepository.save(credential);
+        credentialRepository.save(credential);
 
-        CredentialResponse response = new CredentialResponse();
+        RegisterResponse response = new RegisterResponse();
 
-        response.setId(credentialGuardada.getId());
-        response.setUserId(credentialGuardada.getUserId());
+        response.setMessage("Usuario registrado correctamente");
+        response.setUserId(user.getId());
 
         return response;
     }

@@ -23,7 +23,6 @@ public class UserController {
 
         user.setNombre(request.getNombre());
         user.setEmail(request.getEmail());
-        user.setRol(request.getRol());
 
         return userService.crearUsuario(user);
     }

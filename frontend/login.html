@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Iniciar sesión | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<main class="auth-page">
+
+    <section class="auth-container">
+
+        <div class="auth-header">
+
+            <a href="index.html" class="auth-logo">
+                TechMarket
+            </a>
+
+            <p class="auth-tag">
+                MARKETPLACE TECNOLÓGICO
+            </p>
+
+            <h1>Bienvenido de nuevo.</h1>
+
+            <p class="auth-description">
+                Inicia sesión para continuar con tu cuenta.
+            </p>
+
+        </div>
+
+
+        <form class="auth-form" id="login-form">
+
+            <div class="form-group">
+
+                <label for="email">
+                    Correo electrónico
+                </label>
+
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="tu@correo.com"
+                        required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Contraseña
+                </label>
+
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Tu contraseña"
+                        required
+                >
+
+            </div>
+
+
+            <button type="submit" class="auth-button">
+                Iniciar sesión
+            </button>
+
+            <p id="login-message"></p>
+
+            <div id="user-info"></div>
+
+        </form>
+
+
+        <div class="auth-footer">
+
+            <p>
+                ¿No tienes una cuenta?
+                <a href="register.html">Crear cuenta</a>
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="js/auth.js"></script>
+
+</body>
+
+</html>

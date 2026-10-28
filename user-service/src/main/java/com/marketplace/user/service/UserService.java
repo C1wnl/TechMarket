@@ -26,6 +26,8 @@ public class UserService {
             );
         }
 
+        user.setRol("USER");
+
         return userRepository.save(user);
     }
 

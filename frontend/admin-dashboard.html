@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Panel de administración | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/auth.js" defer></script>
+    <script src="js/admin-dashboard.js" defer></script>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+
+        <a href="index.html" class="logo">TechMarket</a>
+
+        <div class="nav-actions">
+            <span id="admin-name">Administrador</span>
+
+            <button
+                    id="logout-button"
+                    class="logout-button"
+                    type="button">
+                Cerrar sesión
+            </button>
+        </div>
+
+    </div>
+</header>
+
+<main class="admin-container">
+
+    <section class="admin-welcome">
+        <p class="admin-label">ADMINISTRACIÓN</p>
+
+        <h1>
+            Tu plataforma.
+            <span>Tu control.</span>
+        </h1>
+
+        <p>
+            Administra las áreas principales de TechMarket
+            desde un solo lugar.
+        </p>
+    </section>
+
+    <section class="admin-section">
+
+        <div class="admin-section-header">
+            <div>
+                <p class="admin-section-tag">GESTIÓN DE LA PLATAFORMA</p>
+                <h2>Centro de administración</h2>
+            </div>
+
+            <span class="admin-role">
+                <span class="admin-status-dot"></span>
+                Administrador
+            </span>
+        </div>
+
+        <div class="admin-grid" id="admin-grid">
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon">👥</div>
+                    <span class="admin-card-number">01</span>
+                </div>
+
+                <h3>Usuarios</h3>
+
+                <p>
+                    Consulta las cuentas registradas y revisa
+                    la información de los usuarios de la plataforma.
+                </p>
+
+                <button
+                        id="show-users-button"
+                        class="admin-card-button"
+                        type="button">
+                    Gestionar usuarios
+                    <span>→</span>
+                </button>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon">📦</div>
+                    <span class="admin-card-number">02</span>
+                </div>
+
+                <h3>Productos</h3>
+
+                <p>
+                    Organiza el catálogo tecnológico y prepara
+                    las herramientas de gestión de productos.
+                </p>
+
+                <button class="admin-card-button" type="button" disabled>
+                    Próximamente
+                    <span>→</span>
+                </button>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon">🛒</div>
+                    <span class="admin-card-number">03</span>
+                </div>
+
+                <h3>Pedidos</h3>
+
+                <p>
+                    Consulta las compras y prepara el seguimiento
+                    de los pedidos de los clientes.
+                </p>
+
+                <button class="admin-card-button" type="button" disabled>
+                    Próximamente
+                    <span>→</span>
+                </button>
+            </article>
+
+            <article class="admin-card">
+                <div class="admin-card-top">
+                    <div class="admin-card-icon">📊</div>
+                    <span class="admin-card-number">04</span>
+                </div>
+
+                <h3>Resumen</h3>
+
+                <p>
+                    Prepara una vista general de la actividad
+                    y los indicadores de TechMarket.
+                </p>
+
+                <button class="admin-card-button" type="button" disabled>
+                    Próximamente
+                    <span>→</span>
+                </button>
+            </article>
+
+        </div>
+
+        <!-- Panel de gestión de usuarios -->
+        <section id="users-panel" class="admin-section" hidden>
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">GESTIÓN DE CUENTAS</p>
+                    <h2>Usuarios registrados</h2>
+                    <p id="users-count">Preparando listado...</p>
+                </div>
+
+                <button
+                        id="refresh-users-button"
+                        class="logout-button"
+                        type="button">
+                    Actualizar lista
+                </button>
+            </div>
+
+            <p id="users-message" role="status" aria-live="polite">
+                Selecciona la opción para consultar los usuarios.
+            </p>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo electrónico</th>
+                        <th>Rol</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <button
+                    id="back-to-admin-button"
+                    class="logout-button"
+                    type="button">
+                ← Volver al panel
+            </button>
+
+        </section>
+
+    </section>
+
+    <section class="admin-note" id="admin-note">
+        <div class="admin-note-icon">i</div>
+
+        <div>
+            <h3>Espacio de administración</h3>
+            <p>
+                Las herramientas se habilitarán progresivamente
+                a medida que conectemos los microservicios.
+            </p>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>
