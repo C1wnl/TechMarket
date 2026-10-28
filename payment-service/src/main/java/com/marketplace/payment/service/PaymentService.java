@@ -48,8 +48,32 @@ public class PaymentService {
 
 
     public Payment crearPago(Payment payment) {
+        // Sin transacción exterior: un INSERT concurrente puede perder la carrera del UNIQUE.
+        // Su rollback debe terminar antes de consultar el pago ganador.
+        var existing = existingFor(payment);
+        if (existing != null) return existing;
         payment.setEstado("PENDIENTE");
-        return paymentRepository.save(payment);
+        try {
+            return paymentRepository.saveAndFlush(payment);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            existing = existingFor(payment);
+            if (existing != null) return existing;
+            throw ex;
+        }
+    }
+
+    private Payment existingFor(Payment request) {
+        var matches = paymentRepository.findByOrderId(request.getOrderId(), Sort.by("id"));
+        if (matches.isEmpty()) return null;
+        if (matches.size() != 1) throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "Hay pagos históricos duplicados para este pedido; revisar manualmente");
+        var payment = matches.getFirst();
+        if (!java.util.Objects.equals(payment.getUserId(), request.getUserId())
+                || payment.getMonto().compareTo(request.getMonto()) != 0
+                || !java.util.Objects.equals(payment.getMetodoPago(), request.getMetodoPago()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "El pedido ya tiene un pago con otros datos");
+        return payment;
     }
 
     public List<Payment> obtenerPagos() {
@@ -94,7 +118,8 @@ public class PaymentService {
             );
         }
 
-        Payment payment = obtenerPagoPorId(id);
+        Payment payment = paymentRepository.lockById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "El pago no existe"));
         String estadoActual = payment.getEstado();
 
         if (nuevoEstado.equals(estadoActual)) {

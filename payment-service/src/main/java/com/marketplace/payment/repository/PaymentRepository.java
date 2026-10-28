@@ -11,4 +11,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByOrderId(Long orderId, Sort sort);
 
     List<Payment> findByUserId(Long userId, Sort sort);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select p from Payment p where p.id = :id")
+    java.util.Optional<Payment> lockById(@org.springframework.data.repository.query.Param("id") Long id);
 }
