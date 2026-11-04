@@ -1,0 +1,113 @@
+name: techmarket-databases
+
+services:
+  auth-db:
+    image: postgres:16
+    container_name: techmarket-auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  user-db:
+    image: postgres:16
+    container_name: techmarket-user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d user_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  product-db:
+    image: postgres:16
+    container_name: techmarket-product-db
+    environment:
+      POSTGRES_DB: product-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5435:5432"
+    volumes:
+      - product_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d product-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  order-db:
+    image: postgres:16
+    container_name: techmarket-order-db
+    environment:
+      POSTGRES_DB: order-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5436:5432"
+    volumes:
+      - order_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d order-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  payment-db:
+    image: postgres:16
+    container_name: techmarket-payment-db
+    environment:
+      POSTGRES_DB: payment-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5437:5432"
+    volumes:
+      - payment_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d payment-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  notification-db:
+    image: postgres:16
+    container_name: techmarket-notification-db
+    environment:
+      POSTGRES_DB: notification-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techmarket_local}
+    ports:
+      - "127.0.0.1:5438:5432"
+    volumes:
+      - notification_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notification-db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  auth_data:
+  user_data:
+  product_data:
+  order_data:
+  payment_data:
+  notification_data:
+

@@ -6,6 +6,7 @@ import com.marketplace.payment.model.Payment;
 import com.marketplace.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,9 @@ public class PaymentController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('INTERNAL')")
     public Payment crearPago(@Valid @RequestBody PaymentRequest request) {
+
         Payment payment = new Payment();
         payment.setOrderId(request.getOrderId());
         payment.setUserId(request.getUserId());
@@ -33,29 +36,36 @@ public class PaymentController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Payment> obtenerPagos() {
         return paymentService.obtenerPagos();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Payment obtenerPagoPorId(@PathVariable Long id) {
         return paymentService.obtenerPagoPorId(id);
     }
 
     @GetMapping("/order/{orderId}")
+    @PreAuthorize("isAuthenticated()")
     public List<Payment> obtenerPagosPorPedido(@PathVariable Long orderId) {
         return paymentService.obtenerPagosPorPedido(orderId);
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("isAuthenticated()")
     public List<Payment> obtenerPagosPorUsuario(@PathVariable Long userId) {
         return paymentService.obtenerPagosPorUsuario(userId);
     }
 
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public Payment actualizarEstado(
             @PathVariable Long id,
             @Valid @RequestBody PaymentStatusRequest request) {
+
         return paymentService.actualizarEstado(id, request.getEstado());
     }
 }
+

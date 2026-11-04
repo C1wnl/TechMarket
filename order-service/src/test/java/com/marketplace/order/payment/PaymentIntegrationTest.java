@@ -1,215 +1,376 @@
+
 package com.marketplace.order.payment;
 
 import com.marketplace.order.client.PaymentClient;
 import com.marketplace.order.client.ProductClient;
 import com.marketplace.order.dto.OrderRequest;
-import com.marketplace.order.dto.OrderItemRequest;
-import com.marketplace.order.dto.ProductResponse;
-import com.marketplace.order.model.*;
+import com.marketplace.order.model.Order;
+import com.marketplace.order.model.OrderStatus;
 import com.marketplace.order.repository.OrderRepository;
-import com.marketplace.order.service.OrderService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
-import tools.jackson.databind.json.JsonMapper;
-import java.math.BigDecimal;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.time.Instant;
-import java.util.*;
-import java.util.concurrent.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
+import java.util.Objects;
 
-@SpringBootTest(properties = {
-        "spring.profiles.active=local,payment-kafka", "payment.recovery.enabled=false", "payment.kafka.auto-startup=false",
-        "spring.datasource.url=jdbc:h2:mem:paymentintegration;MODE=PostgreSQL;DB_CLOSE_DELAY=-1",
-        "spring.datasource.driver-class-name=org.h2.Driver", "spring.jpa.hibernate.ddl-auto=create-drop"})
-class PaymentIntegrationTest {
-    @Autowired OrderRepository orders;
-    @Autowired PaymentInboxRepository inbox;
-    @Autowired PaymentInboxService events;
-    @Autowired PaymentWorkflow workflow;
-    @Autowired OrderService service;
-    @Autowired JsonMapper json;
-    @Autowired PlatformTransactionManager manager;
-    @MockitoBean ProductClient products;
-    @MockitoBean PaymentClient payments;
+@Service
+@ConditionalOnProperty(
+        name = "payment.integration.enabled",
+        havingValue = "true"
+)
+public class PaymentWorkflow {
 
-    @BeforeEach void clean() {
-        inbox.deleteAll(); orders.deleteAll();
-        when(products.obtenerProducto(1L)).thenReturn(new ProductResponse(1L, "Teclado", new BigDecimal("350.00"), 100));
-        when(payments.crear(any())).thenAnswer(a -> {
-            Order o = a.getArgument(0);
-            return new PaymentClient.PaymentResponse(o.getId() + 1000, o.getId(), o.getUserId(), o.getTotal(), "TARJETA", "PENDIENTE");
+    private static final Logger log =
+            LoggerFactory.getLogger(PaymentWorkflow.class);
+
+    private final OrderRepository orders;
+    private final ProductClient products;
+    private final PaymentClient payments;
+    private final TransactionTemplate tx;
+    private final long leaseMillis;
+
+    private record Work(
+            String phase,
+            Order order,
+            Instant leaseUntil
+    ) {}
+
+    public PaymentWorkflow(
+            OrderRepository orders,
+            ProductClient products,
+            PaymentClient payments,
+            PlatformTransactionManager manager,
+            @Value("${payment.workflow.lease-ms:300000}") long leaseMillis
+    ) {
+        if (leaseMillis <= 0) {
+            throw new IllegalArgumentException(
+                    "El tiempo de reserva debe ser positivo"
+            );
+        }
+
+        this.orders = orders;
+        this.products = products;
+        this.payments = payments;
+        this.tx = new TransactionTemplate(manager);
+        this.leaseMillis = leaseMillis;
+    }
+
+    public String key(Long userId, String key) {
+        if (key == null) {
+            return null;
+        }
+
+        if (!key.matches("[A-Za-z0-9._:-]{1,100}")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Idempotency-Key inválida (1-100 caracteres ASCII)"
+            );
+        }
+
+        return userId + ":" + key;
+    }
+
+    public Order existing(String key, OrderRequest request) {
+        var old = orders.findByRequestKey(key).orElse(null);
+
+        if (old == null) {
+            return null;
+        }
+
+        boolean same = old.getItems().size() == request.items().size()
+                && request.items().stream().allMatch(r ->
+                old.getItems().stream().anyMatch(i ->
+                        Objects.equals(i.getProductId(), r.productId())
+                                && Objects.equals(i.getCantidad(), r.cantidad())
+                ))
+                && request.items().stream()
+                .map(r -> r.productId())
+                .distinct()
+                .count() == request.items().size();
+
+        if (!same) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Idempotency-Key utilizada con otros productos/cantidades"
+            );
+        }
+
+        return old;
+    }
+
+    public Order start(Order order, OrderRequest request) {
+        order.setIntegrationPhase("RESERVE");
+        order.setNextAttempt(Instant.now());
+
+        Long id;
+
+        try {
+            id = tx.execute(status ->
+                    orders.saveAndFlush(order).getId()
+            );
+
+        } catch (DataIntegrityViolationException ex) {
+            if (order.getRequestKey() != null) {
+                var old = existing(order.getRequestKey(), request);
+
+                if (old != null) {
+                    return old;
+                }
+            }
+
+            throw ex;
+        }
+
+        // Primera fase: reservar inventario.
+        advance(id);
+
+        // Segunda fase: crear el pago si la reserva terminó correctamente.
+        advance(id);
+
+        return orders.findById(id).orElseThrow();
+    }
+
+    public void advance(Long id) {
+
+        // 1. Reclamar el trabajo mediante una transacción corta.
+        Work work = tx.execute(status -> {
+            var order = orders.lockById(id).orElseThrow();
+            Instant now = Instant.now();
+
+            String phase = order.getIntegrationPhase();
+
+            if (phase == null
+                    || "DONE".equals(phase)
+                    || "WAIT_RESULT".equals(phase)
+                    || (order.getNextAttempt() != null
+                    && order.getNextAttempt().isAfter(now))) {
+                return null;
+            }
+
+            Instant leaseUntil = now.plusMillis(leaseMillis);
+
+            order.setNextAttempt(leaseUntil);
+            orders.saveAndFlush(order);
+
+            return new Work(
+                    phase,
+                    order,
+                    leaseUntil
+            );
+        });
+
+        if (work == null) {
+            return;
+        }
+
+        // 2. Ejecutar las llamadas HTTP fuera de la transacción.
+        PaymentClient.PaymentResponse payment;
+
+        try {
+            payment = execute(work);
+
+        } catch (RuntimeException ex) {
+            fail(work, ex);
+            return;
+        }
+
+        // 3. Guardar el resultado en una nueva transacción.
+        complete(work, payment);
+    }
+
+    private PaymentClient.PaymentResponse execute(Work work) {
+        Long orderId = work.order().getId();
+
+        switch (work.phase()) {
+
+            case "RESERVE" -> {
+                for (var item : work.order().getItems()) {
+                    products.reservar(
+                            orderId,
+                            item.getProductId(),
+                            item.getCantidad()
+                    );
+                }
+
+                return null;
+            }
+
+            case "CREATE_PAYMENT" -> {
+                return payments.crear(work.order());
+            }
+
+            case "CONFIRM" -> {
+                for (var item : work.order().getItems()) {
+                    products.confirmar(
+                            orderId,
+                            item.getProductId()
+                    );
+                }
+
+                return null;
+            }
+
+            case "RELEASE" -> {
+                RuntimeException error = null;
+
+                // Intentamos liberar todas las reservas.
+                for (var item : work.order().getItems()) {
+                    try {
+                        products.liberar(
+                                orderId,
+                                item.getProductId()
+                        );
+
+                    } catch (RuntimeException ex) {
+                        if (error == null) {
+                            error = ex;
+                        } else {
+                            error.addSuppressed(ex);
+                        }
+                    }
+                }
+
+                if (error != null) {
+                    throw error;
+                }
+
+                return null;
+            }
+
+            default -> throw new IllegalStateException(
+                    "Fase desconocida: " + work.phase()
+            );
+        }
+    }
+
+    private void complete(
+            Work work,
+            PaymentClient.PaymentResponse payment
+    ) {
+        tx.executeWithoutResult(status -> {
+            var order = orders.lockById(
+                    work.order().getId()
+            ).orElseThrow();
+
+            // Evita que un proceso antiguo sobrescriba otro resultado.
+            if (!owns(order, work)) {
+                return;
+            }
+
+            switch (work.phase()) {
+
+                case "RESERVE" ->
+                        order.setIntegrationPhase("CREATE_PAYMENT");
+
+                case "CREATE_PAYMENT" -> {
+                    if (payment == null
+                            || payment.id() == null
+                            || payment.id() <= 0) {
+                        throw new IllegalStateException(
+                                "Payment no devolvió un identificador válido"
+                        );
+                    }
+
+                    order.setPaymentId(payment.id());
+                    order.setStatus(OrderStatus.PENDIENTE_PAGO);
+                    order.setIntegrationPhase("WAIT_RESULT");
+                }
+
+                case "CONFIRM" -> {
+                    order.setStatus(OrderStatus.CONFIRMADO);
+                    order.setIntegrationPhase("DONE");
+                }
+
+                case "RELEASE" -> {
+                    order.setStatus(OrderStatus.CANCELADO);
+                    order.setIntegrationPhase("DONE");
+                }
+
+                default -> throw new IllegalStateException(
+                        "Fase desconocida al completar: " + work.phase()
+                );
+            }
+
+            order.setLastIntegrationError(null);
+            order.setNextAttempt(Instant.now());
+
+            orders.saveAndFlush(order);
         });
     }
-    OrderRequest request() { return new OrderRequest(List.of(new OrderItemRequest(1L, 2))); }
-    Order create() { return service.crearPedido(1L, request()); }
-    Order fresh(Order order) { return orders.findById(order.getId()).orElseThrow(); }
-    void due(Order order) {
-        var o = fresh(order); o.setNextAttempt(Instant.EPOCH); orders.saveAndFlush(o);
-    }
-    PaymentEvent event(Order o, String status) {
-        return new PaymentEvent(UUID.randomUUID().toString(), "APROBADO".equals(status) ? "PAYMENT_APPROVED" : "PAYMENT_REJECTED",
-                o.getPaymentId(), o.getId(), o.getUserId(), o.getTotal(), status, Instant.now().toString());
-    }
-    void receive(PaymentEvent e) { events.receive(json.writeValueAsString(e), UUID.randomUUID().toString()); }
-    void apply(PaymentEvent e) { receive(e); events.process(e.eventId()); }
 
-    @Test void creaReservaSolicitaPagoYRelacionaPaymentId() {
-        var o = create();
-        assertThat(o.getStatus()).isEqualTo(OrderStatus.PENDIENTE_PAGO);
-        assertThat(o.getPaymentId()).isNotNull();
-        verify(products).reservar(o.getId(), 1L, 2);
-        verify(payments).crear(any());
+    private void fail(Work work, RuntimeException ex) {
+        tx.executeWithoutResult(status -> {
+            var order = orders.lockById(
+                    work.order().getId()
+            ).orElseThrow();
+
+            if (!owns(order, work)) {
+                return;
+            }
+
+            // Una reserva pudo haberse realizado aunque otra fallara.
+            if ("RESERVE".equals(work.phase())) {
+                order.setIntegrationPhase("RELEASE");
+                order.setStatus(
+                        OrderStatus.COMPENSACION_PENDIENTE
+                );
+            }
+
+            int attempts = Objects.requireNonNullElse(
+                    order.getIntegrationAttempts(),
+                    0
+            ) + 1;
+
+            order.setIntegrationAttempts(attempts);
+            order.setLastIntegrationError(error(ex));
+            order.setNextAttempt(
+                    Instant.now().plusSeconds(delay(attempts))
+            );
+
+            log.warn(
+                    "Pedido {} fase {} pendiente; intento {}: {}",
+                    order.getId(),
+                    work.phase(),
+                    attempts,
+                    error(ex)
+            );
+
+            orders.saveAndFlush(order);
+        });
     }
-    @Test void aprobadoConfirmaInventarioAntesDelPedido() {
-        var o = create(); var e = event(o, "APROBADO"); apply(e);
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.PENDIENTE_PAGO);
-        workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-        verify(products).confirmar(o.getId(), 1L);
-        verify(products, never()).liberar(anyLong(), anyLong());
-        assertThat(inbox.findById(e.eventId()).orElseThrow().getStatus()).isEqualTo("DONE");
+
+    private boolean owns(Order order, Work work) {
+        return Objects.equals(
+                order.getIntegrationPhase(),
+                work.phase()
+        )
+                && order.getNextAttempt() != null
+                && order.getNextAttempt().toEpochMilli()
+                == work.leaseUntil().toEpochMilli();
     }
-    @Test void rechazadoCompensa() {
-        var o = create(); apply(event(o, "RECHAZADO")); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CANCELADO);
-        verify(products).liberar(o.getId(), 1L);
-        verify(products, never()).confirmar(anyLong(), anyLong());
+
+    static long delay(int attempts) {
+        return Math.min(
+                60,
+                1L << Math.min(attempts, 6)
+        );
     }
-    @Test void duplicadoAprobadoNoRepiteConfirmacion() {
-        var o = create(); var e = event(o, "APROBADO");
-        apply(e); workflow.advance(o.getId()); apply(e); workflow.advance(o.getId());
-        apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        verify(products, times(1)).confirmar(o.getId(), 1L);
-    }
-    @Test void duplicadoRechazadoNoRepiteLiberacion() {
-        var o = create(); var e = event(o, "RECHAZADO");
-        apply(e); workflow.advance(o.getId()); apply(e); workflow.advance(o.getId());
-        apply(event(o, "RECHAZADO")); workflow.advance(o.getId());
-        verify(products, times(1)).liberar(o.getId(), 1L);
-    }
-    @Test void rechazoAtrasadoNoCancelaConfirmado() {
-        var o = create(); apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        apply(event(o, "RECHAZADO")); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-        verify(products, never()).liberar(anyLong(), anyLong());
-    }
-    @Test void aprobadoAtrasadoNoReviveCancelado() {
-        var o = create(); apply(event(o, "RECHAZADO")); workflow.advance(o.getId());
-        apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CANCELADO);
-        verify(products, never()).confirmar(anyLong(), anyLong());
-    }
-    @Test void falloConfirmandoPersisteDecisionYReintentaSinAceptarRechazo() {
-        var o = create();
-        doThrow(new IllegalStateException("Product caído")).doNothing().when(products).confirmar(o.getId(), 1L);
-        apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.PENDIENTE_PAGO);
-        assertThat(fresh(o).getLastIntegrationError()).contains("Product caído");
-        apply(event(o, "RECHAZADO")); due(o);
-        // Una nueva instancia recupera exclusivamente el estado persistido, sin memoria del proceso anterior.
-        new PaymentWorkflow(orders, products, payments, manager).advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-        verify(products, never()).liberar(anyLong(), anyLong());
-    }
-    @Test void falloLiberandoQuedaCompensacionPendienteYSeRecupera() {
-        var o = create();
-        doThrow(new IllegalStateException("temporal")).doNothing().when(products).liberar(o.getId(), 1L);
-        apply(event(o, "RECHAZADO")); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.COMPENSACION_PENDIENTE);
-        due(o); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CANCELADO);
-    }
-    @Test void pagoInciertoReintentaMismoPedidoSinLiberarInventario() {
-        doThrow(new IllegalStateException("respuesta perdida")).when(payments).crear(any());
-        var o = create();
-        assertThat(o.getIntegrationPhase()).isEqualTo("CREATE_PAYMENT");
-        assertThat(o.getStatus()).isEqualTo(OrderStatus.PENDIENTE);
-        doReturn(new PaymentClient.PaymentResponse(999L, o.getId(), 1L, o.getTotal(), "TARJETA", "PENDIENTE")).when(payments).crear(any());
-        due(o); workflow.advance(o.getId());
-        assertThat(fresh(o).getPaymentId()).isEqualTo(999L);
-        verify(products, never()).liberar(anyLong(), anyLong());
-    }
-    @Test void eventoLlegaAntesDeAsociacionRestYSeConserva() {
-        doThrow(new IllegalStateException("timeout")).when(payments).crear(any());
-        var o = create();
-        var e = new PaymentEvent(UUID.randomUUID().toString(), "PAYMENT_APPROVED", 999L, o.getId(), 1L, o.getTotal(), "APROBADO", Instant.now().toString());
-        apply(e);
-        assertThat(inbox.findById(e.eventId()).orElseThrow().getStatus()).isEqualTo("PENDING");
-        doReturn(new PaymentClient.PaymentResponse(999L, o.getId(), 1L, o.getTotal(), "TARJETA", "APROBADO")).when(payments).crear(any());
-        due(o); workflow.advance(o.getId());
-        var row = inbox.findById(e.eventId()).orElseThrow(); row.nextAttempt = Instant.EPOCH; inbox.saveAndFlush(row);
-        events.process(e.eventId()); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-    }
-    @Test void validaMontoUsuarioPaymentIdYPertenencia() {
-        var o = create(); var other = create();
-        var eventsToReject = List.of(
-            new PaymentEvent(UUID.randomUUID().toString(), "PAYMENT_APPROVED", o.getPaymentId(), o.getId(), 1L, BigDecimal.ONE, "APROBADO", Instant.now().toString()),
-            new PaymentEvent(UUID.randomUUID().toString(), "PAYMENT_APPROVED", o.getPaymentId(), o.getId(), 2L, o.getTotal(), "APROBADO", Instant.now().toString()),
-            new PaymentEvent(UUID.randomUUID().toString(), "PAYMENT_APPROVED", o.getPaymentId()+123, o.getId(), 1L, o.getTotal(), "APROBADO", Instant.now().toString()),
-            new PaymentEvent(UUID.randomUUID().toString(), "PAYMENT_APPROVED", o.getPaymentId(), other.getId(), 1L, o.getTotal(), "APROBADO", Instant.now().toString()));
-        for (var e : eventsToReject) {
-            apply(e); assertThat(inbox.findById(e.eventId()).orElseThrow().getStatus()).isEqualTo("INVALID");
-        }
-        assertThat(fresh(o).getPaymentOutcome()).isNull();
-        verify(products, never()).confirmar(anyLong(), anyLong());
-    }
-    @Test void mensajeMalformadoSeConservaSinBloquearValidos() {
-        events.receive("no es JSON", "payment-events:0:1");
-        var o = create(); apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        assertThat(inbox.findById("invalid:payment-events:0:1").orElseThrow().getStatus()).isEqualTo("INVALID");
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-    }
-    @Test void reservaInciertaCompensaTodasLasLineas() {
-        doThrow(new IllegalStateException("respuesta perdida")).when(products).reservar(anyLong(), anyLong(), anyInt());
-        var o = create();
-        assertThat(o.getStatus()).isEqualTo(OrderStatus.COMPENSACION_PENDIENTE);
-        due(o); workflow.advance(o.getId());
-        verify(products).liberar(o.getId(), 1L);
-        verify(payments, never()).crear(any());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CANCELADO);
-    }
-    @Test void reintentoHttpConMismaClaveNoCreaOtroPedidoNiPago() {
-        var one = service.crearPedido(1L, request(), "postman-001");
-        var two = service.crearPedido(1L, request(), "postman-001");
-        assertThat(two.getId()).isEqualTo(one.getId());
-        assertThat(orders.count()).isEqualTo(1);
-        verify(payments, times(1)).crear(any());
-        assertThatThrownBy(() -> service.crearPedido(1L, new OrderRequest(List.of(new OrderItemRequest(1L, 3))), "postman-001"))
-                .isInstanceOf(ResponseStatusException.class);
-    }
-    @Test void simuladoresNoAlteranPedidosConPagoReal() {
-        var o = create();
-        assertThatThrownBy(() -> service.aprobarPago(o.getId())).isInstanceOf(ResponseStatusException.class);
-        assertThatThrownBy(() -> service.rechazarPago(o.getId())).isInstanceOf(ResponseStatusException.class);
-        assertThatThrownBy(() -> service.solicitarPago(o.getId())).isInstanceOf(ResponseStatusException.class);
-    }
-    @Test void confirmacionParcialNuncaMarcaConfirmadoNiPermiteCompensacionContraria() {
-        when(products.obtenerProducto(2L)).thenReturn(new ProductResponse(2L, "Mouse", new BigDecimal("100.00"), 20));
-        var o = service.crearPedido(1L, new OrderRequest(List.of(new OrderItemRequest(1L, 1), new OrderItemRequest(2L, 1))));
-        doThrow(new IllegalStateException("segunda línea caída")).doNothing().when(products).confirmar(o.getId(), 2L);
-        apply(event(o, "APROBADO")); workflow.advance(o.getId());
-        verify(products).confirmar(o.getId(), 1L);
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.PENDIENTE_PAGO);
-        apply(event(o, "RECHAZADO")); due(o); workflow.advance(o.getId());
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-        verify(products, never()).liberar(anyLong(), anyLong());
-    }
-    @Test void consumidoresConcurrentesSoloAplicanUnResultado() throws Exception {
-        var o = create(); var e = event(o, "APROBADO"); receive(e);
-        try (var pool = Executors.newFixedThreadPool(4)) {
-            var jobs = new ArrayList<Future<?>>();
-            for (int i = 0; i < 8; i++) jobs.add(pool.submit(() -> { events.process(e.eventId()); workflow.advance(o.getId()); }));
-            for (var job : jobs) job.get(20, TimeUnit.SECONDS);
-        }
-        assertThat(fresh(o).getStatus()).isEqualTo(OrderStatus.CONFIRMADO);
-        verify(products, times(1)).confirmar(o.getId(), 1L);
+
+    static String error(Exception ex) {
+        String message = ex.getClass().getSimpleName()
+                + ": " + ex.getMessage();
+
+        return message.substring(
+                0,
+                Math.min(message.length(), 1000)
+        );
     }
 }

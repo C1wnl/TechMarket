@@ -78,8 +78,14 @@ public class PaymentInboxService {
                 finish(entry, "IGNORED", "Pedido en estado terminal o incompatible"); return;
             }
             order.setPaymentOutcome(event.estado());
-            order.setIntegrationPhase("APROBADO".equals(event.estado()) ? "CONFIRM" : "RELEASE");
-            if ("RECHAZADO".equals(event.estado())) order.setStatus(OrderStatus.COMPENSACION_PENDIENTE);
+
+            boolean aprobado = "APROBADO".equals(event.estado());
+
+            order.setIntegrationPhase(aprobado ? "CONFIRM" : "RELEASE");
+
+            if (!aprobado) {
+                order.setStatus(OrderStatus.COMPENSACION_PENDIENTE);
+            }
             order.setNextAttempt(Instant.now());
             finish(entry, "DONE", null);
         });
@@ -95,9 +101,16 @@ public class PaymentInboxService {
         if (event.orderId() == null || event.orderId() <= 0 || event.paymentId() == null || event.paymentId() <= 0
                 || event.userId() == null || event.userId() <= 0 || event.monto() == null || event.monto().signum() <= 0)
             throw new IllegalArgumentException("Identidad o monto inválido");
-        if (!("PAYMENT_APPROVED".equals(event.eventType()) && "APROBADO".equals(event.estado()))
-                && !("PAYMENT_REJECTED".equals(event.eventType()) && "RECHAZADO".equals(event.estado())))
+        boolean validEvent =
+                ("PAYMENT_APPROVED".equals(event.eventType())
+                        && "APROBADO".equals(event.estado()))
+                        || ("PAYMENT_REJECTED".equals(event.eventType())
+                        && "RECHAZADO".equals(event.estado()))
+                        || ("PAYMENT_CANCELLED".equals(event.eventType())
+                        && "CANCELADO".equals(event.estado()));
+
+        if (!validEvent) {
             throw new IllegalArgumentException("Tipo y estado incompatibles");
-        Instant.parse(event.fechaEvento());
+        }
     }
 }
