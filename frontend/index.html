@@ -209,7 +209,15 @@
             }
         }
 
+
         async function inicializarContador() {
+            // Los invitados no necesitan consultar /auth/me.
+            if (!API.getToken()) {
+                cartCount.textContent = "0";
+                cartCount.style.display = "none";
+                return;
+            }
+
             try {
                 const session = await API.get("/auth/me");
 
@@ -245,6 +253,7 @@
                 cartCount.style.display = "none";
             }
         }
+
 
         inicializarContador();
     })();

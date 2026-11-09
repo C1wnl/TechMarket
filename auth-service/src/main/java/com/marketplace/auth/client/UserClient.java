@@ -2,6 +2,7 @@ package com.marketplace.auth.client;
 
 import com.marketplace.auth.dto.RegisterUserRequest;
 import com.marketplace.auth.dto.UserResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -12,9 +13,15 @@ import org.springframework.web.server.ResponseStatusException;
 public class UserClient {
 
     private final RestClient restClient;
+    private final String userServiceUrl;
 
-    public UserClient(RestClient restClient) {
+    public UserClient(
+            RestClient restClient,
+            @Value("${user.service.url:http://localhost:8082}")
+            String userServiceUrl
+    ) {
         this.restClient = restClient;
+        this.userServiceUrl = userServiceUrl;
     }
 
     public UserResponse obtenerUsuarioPorEmail(String email) {
@@ -22,7 +29,10 @@ public class UserClient {
         try {
 
             return restClient.get()
-                    .uri("http://localhost:8082/users/email?email={email}", email)
+                    .uri(
+                            userServiceUrl + "/users/email?email={email}",
+                            email
+                    )
                     .retrieve()
                     .body(UserResponse.class);
 
@@ -40,7 +50,7 @@ public class UserClient {
         try {
 
             return restClient.post()
-                    .uri("http://localhost:8082/users")
+                    .uri(userServiceUrl + "/users")
                     .body(request)
                     .retrieve()
                     .body(UserResponse.class);

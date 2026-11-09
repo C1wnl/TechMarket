@@ -34,17 +34,20 @@ const API = {
             );
         }
 
-        if (response.status === 401) {
-            localStorage.removeItem("token");
 
-            if (!["login.html", "register.html"].some(page =>
-                window.location.pathname.endsWith(page)
-            )) {
-                window.location.replace("login.html");
+        if (response.status === 401) {
+            // Si había un token, la sesión puede haber expirado.
+            if (token) {
+                localStorage.removeItem("token");
             }
 
-            throw new Error("Tu sesión ha expirado. Inicia sesión nuevamente.");
+            // No redirigir globalmente: cada página protegida
+            // debe gestionar su propia autenticación.
+            throw new Error(
+                "No tienes autorización para realizar esta operación. Inicia sesión si es necesario."
+            );
         }
+
 
         if (!response.ok) {
             let message = `Error HTTP ${response.status}`;
