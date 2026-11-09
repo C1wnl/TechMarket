@@ -1,10 +1,13 @@
 package com.marketplace.user.controller;
 
+import com.marketplace.user.dto.UserProfileResponse;
 import com.marketplace.user.dto.UserRequest;
 import com.marketplace.user.model.User;
 import com.marketplace.user.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -31,10 +34,21 @@ public class UserController {
     public List<User> obtenerUsuarios() {
         return userService.obtenerUsuarios();
     }
+
+    @GetMapping("/me")
+    public UserProfileResponse obtenerMiPerfil(
+            Authentication authentication) {
+
+        Long userId = Long.valueOf(authentication.getName());
+
+        return userService.obtenerMiPerfil(userId);
+    }
+
     @GetMapping("/{id}")
     public User obtenerUsuarioPorId(@PathVariable Long id) {
         return userService.obtenerUsuarioPorId(id);
     }
+
     @GetMapping("/email")
     public User obtenerUsuarioPorEmail(@RequestParam String email) {
         return userService.obtenerUsuarioPorEmail(email);

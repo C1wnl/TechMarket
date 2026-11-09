@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,6 +8,7 @@
 
     <link rel="stylesheet" href="css/style.css">
 
+    <script src="js/api.js" defer></script>
     <script src="js/auth.js" defer></script>
     <script src="js/profile.js" defer></script>
 </head>
@@ -16,22 +16,19 @@
 
 <header class="navbar">
     <div class="nav-container">
-
         <a href="index.html" class="logo">TechMarket</a>
 
         <nav class="profile-nav">
             <a href="index.html" class="profile-back-link">
-                 Volver a la tienda
+                Volver a la tienda
             </a>
 
-            <button
-                    id="logout-button"
+            <button id="logout-button"
                     class="logout-button"
                     type="button">
                 Cerrar sesión
             </button>
         </nav>
-
     </div>
 </header>
 
@@ -39,11 +36,9 @@
 
     <section class="profile-heading">
         <p class="profile-eyebrow">TU CUENTA TECHMARKET</p>
-
         <h1>Mi perfil<span>.</span></h1>
-
         <p>
-            Consulta la información de tu cuenta y administra
+            Consulta tu información personal y administra
             tu experiencia en TechMarket.
         </p>
     </section>
@@ -52,57 +47,70 @@
 
         <aside class="profile-sidebar">
 
-            <div class="profile-avatar" id="profile-avatar">
-                U
-            </div>
+            <div class="profile-avatar" id="profile-avatar">U</div>
 
-            <h2 id="profile-display-name">Mi cuenta</h2>
+            <h2 id="profile-display-name">Cargando...</h2>
 
-            <p id="profile-email">Información de la cuenta</p>
+            <p id="profile-email">Cargando correo...</p>
 
             <span class="profile-role" id="profile-role">
-                Verificando rol...
+                Verificando cuenta...
             </span>
 
             <div class="profile-sidebar-divider"></div>
 
-            <a href="index.html" class="profile-sidebar-link active">
+            <a href="#personal-information"
+               class="profile-sidebar-link active">
                 <span>01</span>
                 Mi información
             </a>
 
-            <div class="profile-sidebar-link profile-link-disabled">
+            <a href="#my-orders" class="profile-sidebar-link">
                 <span>02</span>
                 Mis pedidos
-                <small>Próximamente</small>
-            </div>
+            </a>
+
+            <a href="notifications.html"
+               class="profile-sidebar-link">
+                <span>03</span>
+                Notificaciones
+            </a>
 
         </aside>
 
         <div class="profile-content">
 
-            <section class="profile-panel">
+            <section class="profile-panel"
+                     id="personal-information">
 
                 <div class="profile-panel-heading">
                     <div>
-                        <p class="profile-section-label">INFORMACIÓN PERSONAL</p>
+                        <p class="profile-section-label">
+                            INFORMACIÓN PERSONAL
+                        </p>
                         <h2>Datos de tu cuenta</h2>
                     </div>
 
-                    <span class="profile-lock">Cuenta protegida</span>
+                    <span class="profile-lock">
+                        Cuenta protegida
+                    </span>
                 </div>
 
                 <p class="profile-description">
-                    Esta es la información disponible de tu sesión actual.
-                    Los datos personales se mostrarán cuando conectemos
-                    completamente el perfil con User Service.
+                    Esta es la información asociada a tu cuenta
+                    de TechMarket.
                 </p>
 
                 <div class="profile-fields">
 
                     <div class="profile-field">
-                        <span>Identificador de usuario</span>
-                        <p id="profile-user-id">Cargando...</p>
+                        <span>Nombre completo</span>
+                        <p id="profile-user-name">Cargando...</p>
+                    </div>
+
+                    <div class="profile-field">
+                        <span>Correo electrónico</span>
+                        <p id="profile-user-email">Cargando...</p>
                     </div>
 
                     <div class="profile-field">
@@ -122,28 +130,20 @@
 
             </section>
 
-            <section class="profile-panel profile-orders-panel">
+            <section class="profile-panel profile-orders-panel"
+                     id="my-orders">
 
                 <div class="profile-panel-heading">
                     <div>
-                        <p class="profile-section-label">TU ACTIVIDAD</p>
+                        <p class="profile-section-label">
+                            TU ACTIVIDAD
+                        </p>
                         <h2>Mis pedidos</h2>
                     </div>
                 </div>
 
-                <div class="profile-empty-state">
-                    <div class="profile-empty-icon">□</div>
-
-                    <h3>Tu actividad aparecerá aquí</h3>
-
-                    <p>
-                        Cuando conectemos el microservicio de pedidos,
-                        podrás consultar tus compras desde esta sección.
-                    </p>
-
-                    <a href="index.html" class="profile-store-link">
-                        Volver a la tienda
-                    </a>
+                <div id="profile-orders-container">
+                    <p>Cargando tus pedidos...</p>
                 </div>
 
             </section>

@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Detalle del producto | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <a href="index.html" class="logo">TechMarket</a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html#productos">Productos</a>
+        <a href="index.html#productos">Categorías</a>
+        <a href="index.html#nosotros">Nosotros</a>
+    </nav>
+
+    <div class="nav-actions">
+
+        <a href="cart.html" class="nav-cart-link" aria-label="Ver carrito de compras">
+            Carrito
+            <span class="nav-cart-count" id="cart-count">0</span>
+        </a>
+
+        <a href="login.html" class="login-link" id="login-link">
+            Iniciar sesión
+        </a>
+
+        <a href="register.html" class="register-button" id="register-link">
+            Crear cuenta
+        </a>
+
+        <a href="profile.html" class="register-button" id="account-link"
+           style="display: none;">
+            Mi perfil
+        </a>
+
+        <button
+                id="logout-button"
+                class="logout-button"
+                type="button"
+                style="display: none;"
+        >
+            Cerrar sesión
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="product-detail-section">
+
+    <div id="product-detail">
+        <p>Cargando información del producto...</p>
+    </div>
+
+</main>
+
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/product-detail.js"></script>
+
+<script>
+    (() => {
+        const cartCount = document.getElementById("cart-count");
+
+        let cartKey = null;
+
+        function obtenerIdDesdeToken() {
+            try {
+                const token = API.getToken();
+
+                if (!token) return null;
+
+                const payloadBase64 = token.split(".")[1]
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/");
+
+                const payload = JSON.parse(
+                    atob(
+                        payloadBase64.padEnd(
+                            Math.ceil(payloadBase64.length / 4) * 4,
+                            "="
+                        )
+                    )
+                );
+
+                return payload.sub ?? null;
+
+            } catch (error) {
+                console.error("No se pudo obtener el usuario del token:", error);
+                return null;
+            }
+        }
+
+        function actualizarContador() {
+            if (!cartCount || !cartKey) return;
+
+            try {
+                const cart = JSON.parse(
+                    localStorage.getItem(cartKey) || "[]"
+                );
+
+                const total = Array.isArray(cart)
+                    ? cart.reduce((sum, item) => {
+                        const quantity = Number(
+                            item.quantity ?? item.cantidad ?? item.qty ?? 1
+                        );
+
+                        return sum + (
+                            Number.isFinite(quantity) && quantity > 0
+                                ? quantity
+                                : 0
+                        );
+                    }, 0)
+                    : 0;
+
+                cartCount.textContent = total;
+                cartCount.style.display = total > 0 ? "inline-flex" : "none";
+
+            } catch (error) {
+                console.error("Error al leer el carrito:", error);
+                cartCount.textContent = "0";
+                cartCount.style.display = "none";
+            }
+        }
+
+        async function inicializarContador() {
+            try {
+                const session = await API.get("/auth/me");
+
+                const userId =
+                    session.userId ??
+                    session.id ??
+                    obtenerIdDesdeToken();
+
+                if (userId === null || userId === undefined) {
+                    cartCount.textContent = "0";
+                    cartCount.style.display = "none";
+                    return;
+                }
+
+                cartKey = `techmarket_cart_${userId}`;
+
+                actualizarContador();
+
+                window.addEventListener("storage", (event) => {
+                    if (event.key === cartKey) {
+                        actualizarContador();
+                    }
+                });
+
+                window.addEventListener("cart-updated", actualizarContador);
+                window.addEventListener("pageshow", actualizarContador);
+                window.addEventListener("focus", actualizarContador);
+
+            } catch (error) {
+                console.error("No se pudo inicializar el contador:", error);
+
+                cartCount.textContent = "0";
+                cartCount.style.display = "none";
+            }
+        }
+
+        inicializarContador();
+    })();
+</script>
+
+</body>
+</html>

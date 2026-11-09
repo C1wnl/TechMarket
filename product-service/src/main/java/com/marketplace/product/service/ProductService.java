@@ -1,3 +1,4 @@
+
 package com.marketplace.product.service;
 
 import com.marketplace.product.model.Product;
@@ -6,6 +7,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 
 @Service
@@ -31,5 +33,25 @@ public class ProductService {
                         HttpStatus.NOT_FOUND,
                         "El producto no existe"
                 ));
+    }
+
+    public Product actualizarProducto(Long id, Product datosActualizados) {
+
+        Product productoExistente = obtenerProductoPorId(id);
+
+        productoExistente.setNombre(datosActualizados.getNombre());
+        productoExistente.setDescripcion(datosActualizados.getDescripcion());
+        productoExistente.setPrecio(datosActualizados.getPrecio());
+        productoExistente.setStock(datosActualizados.getStock());
+        productoExistente.setImagenUrl(datosActualizados.getImagenUrl());
+
+        return productRepository.save(productoExistente);
+    }
+
+    public void eliminarProducto(Long id) {
+
+        Product producto = obtenerProductoPorId(id);
+
+        productRepository.delete(producto);
     }
 }

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Notificaciones | TechMarket</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/api.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/notifications.js" defer></script>
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+
+        <a href="index.html" class="logo">TechMarket</a>
+
+        <nav class="profile-nav">
+            <a href="profile.html" class="profile-back-link">
+                Volver a mi perfil
+            </a>
+
+            <button
+                    id="logout-button"
+                    class="logout-button"
+                    type="button">
+                Cerrar sesión
+            </button>
+        </nav>
+
+    </div>
+</header>
+
+<main class="profile-container">
+
+    <section class="profile-heading">
+        <p class="profile-eyebrow">TU CUENTA TECHMARKET</p>
+
+        <h1>Notificaciones<span>.</span></h1>
+
+        <p>
+            Mantente al tanto de tus compras y de las actualizaciones
+            de tus pedidos.
+        </p>
+    </section>
+
+    <section class="profile-panel notifications-panel">
+
+        <div class="profile-panel-heading">
+            <div>
+                <p class="profile-section-label">
+                    CENTRO DE NOTIFICACIONES
+                </p>
+
+                <h2>Tu actividad reciente</h2>
+            </div>
+
+            <span class="profile-lock" id="notifications-count">
+                Cargando...
+            </span>
+        </div>
+
+        <div id="notifications-container">
+            <p>Cargando tus notificaciones...</p>
+        </div>
+
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>

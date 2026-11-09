@@ -1,3 +1,4 @@
+
 package com.marketplace.product.dto;
 
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +26,9 @@ public class ProductRequest {
     @NotNull(message = "El stock es obligatorio")
     @PositiveOrZero(message = "El stock no puede ser negativo")
     private Integer stock;
+
+    @Size(max = 1000, message = "La URL de imagen es demasiado larga")
+    private String imagenUrl;
 
     public String getNombre() {
         return nombre;
@@ -57,4 +61,13 @@ public class ProductRequest {
     public void setStock(Integer stock) {
         this.stock = stock;
     }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
+    }
 }
+

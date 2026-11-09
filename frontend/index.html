@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>TechMarket</title>
+    <title>TechMarket | Tecnología en un solo lugar</title>
 
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,15 +14,21 @@
 
 <header class="navbar">
 
-    <a href="#" class="logo">TechMarket</a>
+    <a href="index.html" class="logo">TechMarket</a>
 
-    <nav class="nav-links">
-        <a href="#">Productos</a>
-        <a href="#">Categorías</a>
-        <a href="#">Nosotros</a>
+    <nav class="nav-links" aria-label="Navegación principal">
+        <a href="#productos">Productos</a>
+        <a href="#productos">Categorías</a>
+        <a href="#nosotros">Nosotros</a>
     </nav>
 
     <div class="nav-actions">
+
+        <a href="cart.html" class="nav-cart-link" aria-label="Ver carrito de compras">
+            Carrito
+            <span class="nav-cart-count" id="cart-count">0</span>
+        </a>
+
         <a href="login.html" class="login-link" id="login-link">
             Iniciar sesión
         </a>
@@ -30,7 +37,8 @@
             Crear cuenta
         </a>
 
-        <a href="profile.html" class="register-button" id="account-link" style="display: none;">
+        <a href="profile.html" class="register-button" id="account-link"
+           style="display: none;">
             Mi perfil
         </a>
 
@@ -42,6 +50,7 @@
         >
             Cerrar sesión
         </button>
+
     </div>
 
 </header>
@@ -66,8 +75,13 @@
             </p>
 
             <div class="hero-actions">
-                <a href="#" class="primary-button">Explorar productos</a>
-                <a href="#" class="secondary-button">Conocer más</a>
+                <a href="#productos" class="primary-button">
+                    Explorar productos
+                </a>
+
+                <a href="#nosotros" class="secondary-button">
+                    Conocer más
+                </a>
             </div>
 
         </div>
@@ -75,7 +89,7 @@
     </section>
 
 
-    <section class="products-section">
+    <section class="products-section" id="productos">
 
         <div class="section-header">
 
@@ -84,75 +98,26 @@
                 <h2>Productos destacados</h2>
             </div>
 
-            <a href="#" class="view-all">Ver todos →</a>
+            <a href="#productos" class="view-all">Ver todos →</a>
 
         </div>
 
-
-        <div class="product-grid">
-
-            <article class="product-card">
-
-                <div class="product-image">
-                    <img src="assets/products/MacBookPro.jpg" alt="Laptop MacBookPro">
-                </div>
-
-                <div class="product-info">
-                    <p class="product-category">LAPTOPS</p>
-                    <h3>TechBook Pro</h3>
-                    <p class="product-price">$18,999 MXN</p>
-
-                    <a href="#" class="product-button">Ver producto →</a>
-                </div>
-
-            </article>
-
-
-            <article class="product-card">
-
-                <div class="product-image">
-                    <img src="assets/products/teclado mecanico.jpg" alt="teclado mecanico">
-                </div>
-
-                <div class="product-info">
-                    <p class="product-category">PERIFÉRICOS</p>
-                    <h3>Mechanical Keyboard</h3>
-                    <p class="product-price">$1,299 MXN</p>
-
-                    <a href="#" class="product-button">Ver producto →</a>
-                </div>
-
-            </article>
-
-
-            <article class="product-card">
-
-                <div class="product-image">
-                    <img src="assets/products/airpods.jpg" alt="Audífonos inalámbricos">
-                </div>
-
-                <div class="product-info">
-                    <p class="product-category">AUDIO</p>
-                    <h3>Wireless Headphones</h3>
-                    <p class="product-price">$2,499 MXN</p>
-
-                    <a href="#" class="product-button">Ver producto →</a>
-                </div>
-
-            </article>
-
+        <div class="product-grid" id="product-grid">
+            <p id="products-message">Cargando productos...</p>
         </div>
 
     </section>
 
 </main>
 
-<footer class="footer">
+
+<footer class="footer" id="nosotros">
 
     <div class="footer-content">
 
         <div class="footer-brand">
             <h2>TechMarket</h2>
+
             <p>
                 Tu marketplace tecnológico.
                 Tecnología que quieres, todo en un solo lugar.
@@ -160,11 +125,10 @@
         </div>
 
         <div class="footer-links">
-
-            <a href="#">Productos</a>
-            <a href="#">Categorías</a>
-            <a href="#">Nosotros</a>
-
+            <a href="#productos">Productos</a>
+            <a href="#productos">Categorías</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="cart.html">Mi carrito</a>
         </div>
 
     </div>
@@ -175,8 +139,116 @@
 
 </footer>
 
+
+<script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+    (() => {
+        const cartCount = document.getElementById("cart-count");
+
+        let cartKey = null;
+
+        function obtenerIdDesdeToken() {
+            try {
+                const token = API.getToken();
+
+                if (!token) return null;
+
+                const payloadBase64 = token.split(".")[1]
+                    .replace(/-/g, "+")
+                    .replace(/_/g, "/");
+
+                const payload = JSON.parse(
+                    atob(
+                        payloadBase64.padEnd(
+                            Math.ceil(payloadBase64.length / 4) * 4,
+                            "="
+                        )
+                    )
+                );
+
+                return payload.sub ?? null;
+
+            } catch (error) {
+                console.error("No se pudo obtener el usuario del token:", error);
+                return null;
+            }
+        }
+
+        function actualizarContador() {
+            if (!cartCount || !cartKey) return;
+
+            try {
+                const cart = JSON.parse(
+                    localStorage.getItem(cartKey) || "[]"
+                );
+
+                const total = Array.isArray(cart)
+                    ? cart.reduce((sum, item) => {
+                        const quantity = Number(
+                            item.quantity ?? item.cantidad ?? item.qty ?? 1
+                        );
+
+                        return sum + (
+                            Number.isFinite(quantity) && quantity > 0
+                                ? quantity
+                                : 0
+                        );
+                    }, 0)
+                    : 0;
+
+                cartCount.textContent = total;
+                cartCount.style.display = total > 0 ? "inline-flex" : "none";
+
+            } catch (error) {
+                console.error("Error al leer el carrito:", error);
+                cartCount.textContent = "0";
+                cartCount.style.display = "none";
+            }
+        }
+
+        async function inicializarContador() {
+            try {
+                const session = await API.get("/auth/me");
+
+                const userId =
+                    session.userId ??
+                    session.id ??
+                    obtenerIdDesdeToken();
+
+                if (userId === null || userId === undefined) {
+                    cartCount.textContent = "0";
+                    cartCount.style.display = "none";
+                    return;
+                }
+
+                cartKey = `techmarket_cart_${userId}`;
+
+                actualizarContador();
+
+                window.addEventListener("storage", (event) => {
+                    if (event.key === cartKey) {
+                        actualizarContador();
+                    }
+                });
+
+                window.addEventListener("cart-updated", actualizarContador);
+                window.addEventListener("pageshow", actualizarContador);
+                window.addEventListener("focus", actualizarContador);
+
+            } catch (error) {
+                console.error("No se pudo inicializar el contador:", error);
+
+                cartCount.textContent = "0";
+                cartCount.style.display = "none";
+            }
+        }
+
+        inicializarContador();
+    })();
+</script>
 
 </body>
 </html>
-

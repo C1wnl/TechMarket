@@ -1,9 +1,12 @@
+
 package com.marketplace.user.config;
 
+import com.marketplace.user.security.InternalKeyAuthenticationFilter;
 import com.marketplace.user.security.JwtAuthenticationFilter;
 import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,9 +18,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final InternalKeyAuthenticationFilter internalKeyAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            InternalKeyAuthenticationFilter internalKeyAuthenticationFilter
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.internalKeyAuthenticationFilter = internalKeyAuthenticationFilter;
     }
 
     @Bean
@@ -50,34 +58,38 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        // Permitir los despachos internos de errores
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
 
-                        // Permitir el registro de usuarios desde auth-service
+                        // Registro desde Auth Service.
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
 
-                        // Permitir la consulta por correo desde auth-service
+                        // Consulta por correo desde Auth Service.
                         .requestMatchers(HttpMethod.GET, "/users/email").permitAll()
 
-                        // Solo ADMIN puede consultar la lista completa
+                        // Comunicación autenticada entre microservicios.
+                        .requestMatchers("/internal/**").hasRole("INTERNAL")
+
+                        // Perfil propio.
+                        .requestMatchers(HttpMethod.GET, "/users/me").authenticated()
+
+                        // Administración de usuarios.
                         .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
-
-                        // Solo ADMIN puede consultar un usuario por ID
                         .requestMatchers(HttpMethod.GET, "/users/{id}").hasRole("ADMIN")
-
-                        // Proteger las demás rutas de usuarios
                         .requestMatchers("/users/**").hasRole("ADMIN")
 
-                        // El resto de las rutas requieren autenticación
                         .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
+                )
+
+                .addFilterAfter(
+                        internalKeyAuthenticationFilter,
+                        JwtAuthenticationFilter.class
                 );
 
         return http.build();
     }
 }
-

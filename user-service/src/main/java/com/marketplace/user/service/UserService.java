@@ -1,5 +1,6 @@
 package com.marketplace.user.service;
 
+import com.marketplace.user.dto.UserProfileResponse;
 import com.marketplace.user.model.User;
 import com.marketplace.user.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -49,5 +50,15 @@ public class UserService {
                         HttpStatus.NOT_FOUND,
                         "El usuario no existe"
                 ));
+    }
+
+    public UserProfileResponse obtenerMiPerfil(Long userId) {
+
+        User user = obtenerUsuarioPorId(userId);
+
+        return new UserProfileResponse(
+                user.getNombre(),
+                user.getEmail()
+        );
     }
 }

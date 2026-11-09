@@ -5,27 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Panel de administración | TechMarket</title>
+    <title>Administración | TechMarket</title>
 
     <link rel="stylesheet" href="css/style.css">
 
+    <script src="js/api.js" defer></script>
     <script src="js/auth.js" defer></script>
     <script src="js/admin-dashboard.js" defer></script>
 </head>
+
 <body>
 
-<header class="navbar">
+<header class="navbar admin-navbar">
     <div class="nav-container">
 
         <a href="index.html" class="logo">TechMarket</a>
 
-        <div class="nav-actions">
-            <span id="admin-name">Administrador</span>
+        <div class="nav-actions admin-nav-actions">
+            <a href="index.html" class="admin-store-link">
+                <span>←</span> Volver a la tienda
+            </a>
 
-            <button
-                    id="logout-button"
-                    class="logout-button"
-                    type="button">
+            <span class="admin-nav-divider"></span>
+
+            <div class="admin-user">
+                <div class="admin-user-avatar">A</div>
+                <div class="admin-user-information">
+                    <span class="admin-user-label">Sesión administrativa</span>
+                    <strong id="admin-name">Administrador</strong>
+                </div>
+            </div>
+
+            <button id="logout-button" class="logout-button" type="button">
                 Cerrar sesión
             </button>
         </div>
@@ -33,120 +44,222 @@
     </div>
 </header>
 
+
 <main class="admin-container">
 
+    <!-- BIENVENIDA -->
     <section class="admin-welcome">
-        <p class="admin-label">ADMINISTRACIÓN</p>
 
-        <h1>
-            Tu plataforma.
-            <span>Tu control.</span>
-        </h1>
+        <div class="admin-welcome-content">
+            <p class="admin-label">ESPACIO DE ADMINISTRACIÓN</p>
 
-        <p>
-            Administra las áreas principales de TechMarket
-            desde un solo lugar.
-        </p>
+            <h1>
+                Bienvenido,
+                <span id="admin-welcome-name">administrador.</span>
+            </h1>
+
+            <p>
+                Gestiona TechMarket desde un solo lugar.
+                Supervisa usuarios, catálogo, pedidos y operaciones de pago.
+            </p>
+        </div>
+
+        <div class="admin-welcome-decoration" aria-hidden="true">
+            <div class="admin-decoration-circle">
+                <span>TM</span>
+            </div>
+        </div>
+
     </section>
 
+
+    <!-- CENTRO DE ADMINISTRACIÓN -->
     <section class="admin-section">
 
-        <div class="admin-section-header">
+        <div class="admin-section-header admin-main-heading">
+
             <div>
-                <p class="admin-section-tag">GESTIÓN DE LA PLATAFORMA</p>
-                <h2>Centro de administración</h2>
+                <p class="admin-section-tag">PANEL DE CONTROL</p>
+                <h2>¿Qué deseas administrar?</h2>
+                <p class="admin-heading-description">
+                    Selecciona un área para consultar y gestionar su información.
+                </p>
             </div>
 
             <span class="admin-role">
                 <span class="admin-status-dot"></span>
-                Administrador
+                Acceso administrador
             </span>
+
         </div>
 
+
+        <!-- TARJETAS PRINCIPALES -->
         <div class="admin-grid" id="admin-grid">
 
             <article class="admin-card">
+
                 <div class="admin-card-top">
-                    <div class="admin-card-icon">👥</div>
+                    <div class="admin-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
                     <span class="admin-card-number">01</span>
                 </div>
 
-                <h3>Usuarios</h3>
+                <div class="admin-card-content">
+                    <h3>Usuarios</h3>
+                    <p>
+                        Consulta las cuentas registradas y revisa
+                        la información de los usuarios.
+                    </p>
+                </div>
 
-                <p>
-                    Consulta las cuentas registradas y revisa
-                    la información de los usuarios de la plataforma.
-                </p>
-
-                <button
-                        id="show-users-button"
-                        class="admin-card-button"
-                        type="button">
-                    Gestionar usuarios
-                    <span>→</span>
+                <button id="show-users-button"
+                        class="admin-card-button" type="button">
+                    Gestionar usuarios <span>→</span>
                 </button>
+
             </article>
 
+
             <article class="admin-card">
+
                 <div class="admin-card-top">
-                    <div class="admin-card-icon">📦</div>
+                    <div class="admin-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                            <path d="m16 6 4 4-4 4"/>
+                            <path d="M20 10H9"/>
+                            <path d="M8 18H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <path d="M8 3v18"/>
+                        </svg>
+                    </div>
                     <span class="admin-card-number">02</span>
                 </div>
 
-                <h3>Productos</h3>
+                <div class="admin-card-content">
+                    <h3>Productos</h3>
+                    <p>
+                        Administra el catálogo, registra nuevos artículos
+                        y actualiza precios e inventario.
+                    </p>
+                </div>
 
-                <p>
-                    Organiza el catálogo tecnológico y prepara
-                    las herramientas de gestión de productos.
-                </p>
-
-                <button class="admin-card-button" type="button" disabled>
-                    Próximamente
-                    <span>→</span>
+                <button id="show-products-button"
+                        class="admin-card-button" type="button">
+                    Gestionar productos <span>→</span>
                 </button>
+
             </article>
 
+
             <article class="admin-card">
+
                 <div class="admin-card-top">
-                    <div class="admin-card-icon">🛒</div>
+                    <div class="admin-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                            <path d="M3 3h2l2.4 12.2a2 2 0 0 0 2 1.8h8.8a2 2 0 0 0 2-1.6L22 8H6"/>
+                            <circle cx="10" cy="21" r="1"/>
+                            <circle cx="18" cy="21" r="1"/>
+                        </svg>
+                    </div>
                     <span class="admin-card-number">03</span>
                 </div>
 
-                <h3>Pedidos</h3>
+                <div class="admin-card-content">
+                    <h3>Pedidos</h3>
+                    <p>
+                        Supervisa las compras, consulta a los clientes
+                        y revisa el detalle de cada pedido.
+                    </p>
+                </div>
 
-                <p>
-                    Consulta las compras y prepara el seguimiento
-                    de los pedidos de los clientes.
-                </p>
-
-                <button class="admin-card-button" type="button" disabled>
-                    Próximamente
-                    <span>→</span>
+                <button id="show-orders-button"
+                        class="admin-card-button" type="button">
+                    Gestionar pedidos <span>→</span>
                 </button>
+
             </article>
 
+
             <article class="admin-card">
+
                 <div class="admin-card-top">
-                    <div class="admin-card-icon">📊</div>
+                    <div class="admin-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                            <rect x="2" y="5" width="20" height="14" rx="2"/>
+                            <path d="M2 10h20"/>
+                            <path d="M6 15h4"/>
+                        </svg>
+                    </div>
                     <span class="admin-card-number">04</span>
                 </div>
 
-                <h3>Resumen</h3>
+                <div class="admin-card-content">
+                    <h3>Pagos</h3>
+                    <p>
+                        Consulta las transacciones y administra
+                        la aprobación o rechazo de los pagos.
+                    </p>
+                </div>
 
-                <p>
-                    Prepara una vista general de la actividad
-                    y los indicadores de TechMarket.
-                </p>
+                <button id="show-payments-button"
+                        class="admin-card-button" type="button">
+                    Gestionar pagos <span>→</span>
+                </button>
+
+            </article>
+
+
+            <article class="admin-card admin-card-coming">
+
+                <div class="admin-card-top">
+                    <div class="admin-card-icon">
+                        <svg viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                            <path d="M3 3v18h18"/>
+                            <path d="m19 9-5 5-4-4-5 5"/>
+                        </svg>
+                    </div>
+                    <span class="admin-card-number">05</span>
+                </div>
+
+                <div class="admin-card-content">
+                    <h3>Resumen general</h3>
+                    <p>
+                        Consulta indicadores, actividad de la plataforma
+                        y estadísticas de TechMarket.
+                    </p>
+                </div>
 
                 <button class="admin-card-button" type="button" disabled>
-                    Próximamente
-                    <span>→</span>
+                    Próximamente <span>→</span>
                 </button>
+
             </article>
 
         </div>
 
-        <!-- Panel de gestión de usuarios -->
+
+        <!-- USUARIOS -->
         <section id="users-panel" class="admin-section" hidden>
 
             <div class="admin-section-header">
@@ -156,10 +269,8 @@
                     <p id="users-count">Preparando listado...</p>
                 </div>
 
-                <button
-                        id="refresh-users-button"
-                        class="logout-button"
-                        type="button">
+                <button id="refresh-users-button"
+                        class="logout-button" type="button">
                     Actualizar lista
                 </button>
             </div>
@@ -178,16 +289,299 @@
                         <th>Rol</th>
                     </tr>
                     </thead>
-
-                    <tbody id="users-table-body">
-                    </tbody>
+                    <tbody id="users-table-body"></tbody>
                 </table>
             </div>
 
-            <button
-                    id="back-to-admin-button"
-                    class="logout-button"
-                    type="button">
+            <button id="back-to-admin-button"
+                    class="logout-button" type="button">
+                ← Volver al panel
+            </button>
+
+        </section>
+
+
+        <!-- PRODUCTOS -->
+        <section id="products-panel" class="admin-section" hidden>
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">GESTIÓN DEL CATÁLOGO</p>
+                    <h2>Productos registrados</h2>
+                    <p id="products-count">Preparando catálogo...</p>
+                </div>
+
+                <button id="refresh-products-button"
+                        class="logout-button" type="button">
+                    Actualizar catálogo
+                </button>
+            </div>
+
+            <p id="products-message" role="status" aria-live="polite">
+                Selecciona la opción para consultar los productos.
+            </p>
+
+
+            <div class="product-form-container">
+
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-section-tag" id="product-form-tag">
+                            NUEVO REGISTRO
+                        </p>
+
+                        <h2 id="product-form-title">Agregar producto</h2>
+
+                        <p id="product-form-description">
+                            Completa los datos para incorporar un producto al catálogo.
+                        </p>
+                    </div>
+                </div>
+
+
+                <form id="create-product-form" class="product-form">
+
+                    <div class="form-group">
+                        <label for="product-name">Nombre del producto</label>
+                        <input type="text" id="product-name" name="nombre"
+                               maxlength="100"
+                               placeholder="Ej. Laptop Lenovo ThinkPad" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-description">Descripción</label>
+                        <textarea id="product-description" name="descripcion"
+                                  maxlength="500" rows="3"
+                                  placeholder="Describe las características del producto"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-price">Precio (MXN)</label>
+                        <input type="number" id="product-price" name="precio"
+                               min="0.01" step="0.01"
+                               placeholder="12500.00" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-stock">Cantidad en inventario</label>
+                        <input type="number" id="product-stock" name="stock"
+                               min="0" step="1"
+                               placeholder="10" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-image">Imagen del producto</label>
+                        <input type="file" id="product-image" name="imagen"
+                               accept="image/jpeg,image/png,image/webp">
+
+                        <small>
+                            Formatos permitidos: JPG, PNG y WEBP.
+                            Tamaño máximo: 5 MB.
+                        </small>
+
+                        <div id="product-image-preview-container"
+                             class="product-image-preview-container" hidden>
+
+                            <p>Vista previa:</p>
+
+                            <img id="product-image-preview"
+                                 class="product-image-preview"
+                                 alt="Vista previa del producto">
+
+                            <button type="button"
+                                    id="remove-product-image-button"
+                                    class="logout-button">
+                                Quitar imagen
+                            </button>
+
+                        </div>
+                    </div>
+
+
+                    <div class="admin-form-actions">
+
+                        <button type="submit" id="create-product-button"
+                                class="admin-card-button">
+                            Registrar producto
+                        </button>
+
+                        <button type="button" id="cancel-edit-button"
+                                class="logout-button" hidden>
+                            Cancelar edición
+                        </button>
+
+                    </div>
+
+                    <p id="create-product-message"
+                       role="status" aria-live="polite"></p>
+
+                </form>
+
+            </div>
+
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">INVENTARIO</p>
+                    <h2>Catálogo de productos</h2>
+                </div>
+            </div>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Precio</th>
+                        <th>Stock</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="products-table-body"></tbody>
+                </table>
+            </div>
+
+            <button id="back-from-products-button"
+                    class="logout-button" type="button">
+                ← Volver al panel
+            </button>
+
+        </section>
+
+
+        <!-- PEDIDOS -->
+        <section id="orders-panel" class="admin-section" hidden>
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">GESTIÓN DE COMPRAS</p>
+                    <h2>Pedidos registrados</h2>
+                    <p id="orders-count">Preparando listado...</p>
+                </div>
+
+                <button id="refresh-orders-button"
+                        class="logout-button" type="button">
+                    Actualizar pedidos
+                </button>
+            </div>
+
+            <p id="orders-message" role="status" aria-live="polite">
+                Selecciona la opción para consultar los pedidos.
+            </p>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                    <tr>
+                        <th>N.º pedido</th>
+                        <th>Comprador</th>
+                        <th>Correo electrónico</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th>Detalles</th>
+                    </tr>
+                    </thead>
+                    <tbody id="orders-table-body"></tbody>
+                </table>
+            </div>
+
+
+            <section id="order-detail-panel"
+                     class="product-form-container" hidden>
+
+                <div class="admin-section-header">
+                    <div>
+                        <p class="admin-section-tag">INFORMACIÓN DE COMPRA</p>
+                        <h2 id="order-detail-title">Detalle del pedido</h2>
+                        <p id="order-detail-customer"></p>
+                    </div>
+
+                    <button id="close-order-detail-button"
+                            class="logout-button" type="button">
+                        Cerrar detalle
+                    </button>
+                </div>
+
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio unitario</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody id="order-items-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="order-detail-total">
+                    <strong>Total del pedido</strong>
+                    <span id="order-detail-total"></span>
+                </div>
+
+            </section>
+
+            <button id="back-from-orders-button"
+                    class="logout-button" type="button">
+                ← Volver al panel
+            </button>
+
+        </section>
+
+
+        <!-- PAGOS -->
+        <section id="payments-panel" class="admin-section" hidden>
+
+            <div class="admin-section-header">
+                <div>
+                    <p class="admin-section-tag">GESTIÓN DE TRANSACCIONES</p>
+                    <h2>Pagos registrados</h2>
+                    <p id="payments-count">Preparando listado...</p>
+                </div>
+
+                <button id="refresh-payments-button"
+                        class="logout-button" type="button">
+                    Actualizar pagos
+                </button>
+            </div>
+
+            <p id="payments-message" role="status" aria-live="polite">
+                Selecciona la opción para consultar los pagos.
+            </p>
+
+            <div class="product-form-container admin-payment-notice">
+                <h3>Administración de pagos</h3>
+                <p>
+                    Esta función forma parte de la simulación académica
+                    de TechMarket y no procesa cargos bancarios reales.
+                </p>
+            </div>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                    <tr>
+                        <th>ID pago</th>
+                        <th>N.º pedido</th>
+                        <th>Monto</th>
+                        <th>Método</th>
+                        <th>Estado</th>
+                        <th>Fecha de creación</th>
+                        <th>Última actualización</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="payments-table-body"></tbody>
+                </table>
+            </div>
+
+            <button id="back-from-payments-button"
+                    class="logout-button" type="button">
                 ← Volver al panel
             </button>
 
@@ -195,25 +589,60 @@
 
     </section>
 
+
+    <!-- NOTA INFORMATIVA -->
     <section class="admin-note" id="admin-note">
+
         <div class="admin-note-icon">i</div>
 
         <div>
-            <h3>Espacio de administración</h3>
+            <h3>Administración de TechMarket</h3>
             <p>
-                Las herramientas se habilitarán progresivamente
-                a medida que conectemos los microservicios.
+                Desde este espacio puedes supervisar y gestionar
+                los principales módulos de la plataforma.
             </p>
         </div>
+
     </section>
 
 </main>
+
 
 <footer class="footer">
     <div class="footer-bottom">
         <p>© 2026 TechMarket. Todos los derechos reservados.</p>
     </div>
 </footer>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const name = document.getElementById("admin-name");
+        const welcomeName = document.getElementById("admin-welcome-name");
+
+        if (!name || !welcomeName) return;
+
+        const observer = new MutationObserver(() => {
+            const currentName = name.textContent.trim();
+
+            if (currentName && currentName !== "Administrador") {
+                welcomeName.textContent = currentName + ".";
+            }
+        });
+
+        observer.observe(name, {
+            childList: true,
+            characterData: true,
+            subtree: true
+        });
+
+        const currentName = name.textContent.trim();
+
+        if (currentName && currentName !== "Administrador") {
+            welcomeName.textContent = currentName + ".";
+        }
+    });
+</script>
 
 </body>
 </html>

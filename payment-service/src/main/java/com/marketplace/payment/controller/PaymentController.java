@@ -2,6 +2,8 @@ package com.marketplace.payment.controller;
 
 import com.marketplace.payment.dto.PaymentRequest;
 import com.marketplace.payment.dto.PaymentStatusRequest;
+import com.marketplace.payment.dto.PaymentResponse;
+import com.marketplace.payment.dto.PaymentCreationResponse;
 import com.marketplace.payment.model.Payment;
 import com.marketplace.payment.service.PaymentService;
 import jakarta.validation.Valid;
@@ -24,7 +26,8 @@ public class PaymentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('INTERNAL')")
-    public Payment crearPago(@Valid @RequestBody PaymentRequest request) {
+    public PaymentCreationResponse crearPago(
+            @Valid @RequestBody PaymentRequest request) {
 
         Payment payment = new Payment();
         payment.setOrderId(request.getOrderId());
@@ -32,40 +35,77 @@ public class PaymentController {
         payment.setMonto(request.getMonto());
         payment.setMetodoPago(request.getMetodoPago().trim());
 
-        return paymentService.crearPago(payment);
+        return toCreationResponse(paymentService.crearPago(payment));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public List<Payment> obtenerPagos() {
-        return paymentService.obtenerPagos();
+    public List<PaymentResponse> obtenerPagos() {
+        return paymentService.obtenerPagos()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public Payment obtenerPagoPorId(@PathVariable Long id) {
-        return paymentService.obtenerPagoPorId(id);
+    public PaymentResponse obtenerPagoPorId(@PathVariable Long id) {
+        return toResponse(paymentService.obtenerPagoPorId(id));
     }
 
     @GetMapping("/order/{orderId}")
     @PreAuthorize("isAuthenticated()")
-    public List<Payment> obtenerPagosPorPedido(@PathVariable Long orderId) {
-        return paymentService.obtenerPagosPorPedido(orderId);
+    public List<PaymentResponse> obtenerPagosPorPedido(
+            @PathVariable Long orderId) {
+
+        return paymentService.obtenerPagosPorPedido(orderId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("isAuthenticated()")
-    public List<Payment> obtenerPagosPorUsuario(@PathVariable Long userId) {
-        return paymentService.obtenerPagosPorUsuario(userId);
+    public List<PaymentResponse> obtenerPagosPorUsuario(
+            @PathVariable Long userId) {
+
+        return paymentService.obtenerPagosPorUsuario(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public Payment actualizarEstado(
+    public PaymentResponse actualizarEstado(
             @PathVariable Long id,
             @Valid @RequestBody PaymentStatusRequest request) {
 
-        return paymentService.actualizarEstado(id, request.getEstado());
+        return toResponse(
+                paymentService.actualizarEstado(id, request.getEstado())
+        );
+    }
+
+    private PaymentCreationResponse toCreationResponse(Payment payment) {
+        return new PaymentCreationResponse(
+                payment.getId(),
+                payment.getOrderId(),
+                payment.getUserId(),
+                payment.getMonto(),
+                payment.getMetodoPago(),
+                payment.getEstado()
+        );
+    }
+
+    private PaymentResponse toResponse(Payment payment) {
+        return new PaymentResponse(
+                payment.getId(),
+                payment.getOrderId(),
+                payment.getMonto(),
+                payment.getMetodoPago(),
+                payment.getEstado(),
+                payment.getFechaCreacion(),
+                payment.getFechaActualizacion()
+        );
     }
 }
-

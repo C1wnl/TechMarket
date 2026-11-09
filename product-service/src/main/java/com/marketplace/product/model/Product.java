@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -27,6 +28,9 @@ public class Product {
 
     @Column(nullable = false)
     private Integer stock;
+
+    @Column(length = 1000)
+    private String imagenUrl;
 
     public Long getId() {
         return id;
@@ -66,5 +70,13 @@ public class Product {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 }
