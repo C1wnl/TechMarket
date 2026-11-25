@@ -1,0 +1,37 @@
+/* Styles scoped to the two new public pages. */
+.store-page .nav-links a[aria-current="page"]::after { width: 100%; }
+.store-hero { padding: 42px 0 64px; background: radial-gradient(circle at 80% 20%, #eee 0, transparent 34%), linear-gradient(120deg, #f8f8f8, #eee); }
+.store-back { display: block; width: fit-content; margin-bottom: 38px; color: var(--color-gray-600); font-size: 12px; }
+.store-hero .hero-tag { display: block; margin-bottom: 18px; }
+.store-hero h1 { font-size: clamp(36px, 5vw, 62px); line-height: 1.1; letter-spacing: -2.5px; }
+.store-hero h1 span { color: var(--color-gray-600); }
+.store-section { padding-block: 64px; }
+.category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.category-tile { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 26px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); background: var(--color-white); color: var(--color-black); transition: background var(--transition), border-color var(--transition); }
+.category-tile:hover { border-color: var(--color-gray-500); background: var(--color-gray-50); }
+.category-tile[aria-pressed="true"] { color: white; background: var(--color-black); border-color: var(--color-black); }
+.category-tile svg { width: 32px; height: 32px; margin-bottom: 22px; }
+.category-name { font-size: 18px; font-weight: 700; letter-spacing: -.4px; }
+.category-detail { font-size: 12px; margin-top: 4px; color: var(--color-gray-600); }
+.category-count { margin-top: 24px; font-size: 12px; font-weight: 600; }
+.category-tile[aria-pressed="true"] .category-detail { color: var(--color-gray-300); }
+.store-results { padding-bottom: 90px; scroll-margin-top: 180px; }
+.store-results #retry-products { margin-top: 20px; }
+.category-empty { grid-column: 1 / -1; padding: 40px 24px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); background: var(--color-gray-50); color: var(--color-gray-600); }
+.store-page .product-image img { width: 100%; height: 100%; object-fit: contain; }
+.about-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; border-bottom: 1px solid var(--color-gray-200); }
+.about-intro h2, .about-cta h2 { margin-top: 14px; font-size: clamp(27px, 3vw, 36px); line-height: 1.2; letter-spacing: -1.2px; }
+.about-copy p { color: var(--color-gray-600); margin-bottom: 16px; line-height: 1.9; }
+.about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.about-card { padding: 28px; border: 1px solid var(--color-gray-200); border-radius: var(--radius-md); }
+.about-number { color: var(--color-gray-500); font-size: 12px; }
+.about-card h3 { margin: 24px 0 12px; font-size: 20px; }
+.about-card p, .about-cta p { color: var(--color-gray-600); font-size: 14px; }
+.about-cta { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 36px; margin-bottom: 80px; background: var(--color-gray-50); border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); }
+.about-cta h2 { margin-bottom: 12px; }
+.store-page .footer-content { display: flex; justify-content: space-between; gap: 32px; max-width: var(--container-width); margin: 0 auto 24px; text-align: left; }
+.store-page .footer-brand p { max-width: 380px; color: var(--color-gray-600); }
+.store-page .footer-links { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+@media(max-width: 1000px) { .store-page .navbar { flex-wrap: wrap; padding-block: 16px; gap: 14px; } .store-page .nav-links { order: 3; flex-basis: 100%; margin-left: 0; } }
+@media(max-width: 680px) { .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .category-tile { padding: 18px; } .category-name { font-size: 16px; } .store-hero { padding-block: 28px 44px; } .store-hero h1 { letter-spacing: -1.5px; } .store-section { padding-block: 44px; } .about-intro, .about-grid { grid-template-columns: 1fr; gap: 24px; } .about-cta, .store-page .footer-content { flex-direction: column; align-items: flex-start; } .about-cta { padding: 24px; } .store-page .nav-actions { justify-content: flex-start; flex-wrap: wrap; font-size: 12px; } .store-page .nav-actions #account-link { padding-left: 5px; border: 0; } .store-page .nav-actions .logout-button { padding: 8px; } }
+@media(max-width: 360px) { .category-grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categorías | TechMarket</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/store-pages.css">
+</head>
+<body class="store-page">
+<header class="navbar">
+
+    <a href="index.html" class="logo">TechMarket</a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html#productos">Productos</a>
+        <a href="categories.html" aria-current="page">Categorías</a>
+        <a href="about.html">Nosotros</a>
+    </nav>
+
+    <div class="nav-actions">
+
+        <a href="cart.html" class="nav-cart-link" aria-label="Ver carrito de compras">
+            Carrito
+            <span class="nav-cart-count" id="cart-count">0</span>
+        </a>
+
+        <a href="login.html" class="login-link" id="login-link">
+            Iniciar sesión
+        </a>
+
+        <a href="register.html" class="register-button" id="register-link">
+            Crear cuenta
+        </a>
+
+        <a href="profile.html" class="register-button" id="account-link"
+           style="display: none;">
+            Mi perfil
+        </a>
+
+        <button
+                id="logout-button"
+                class="logout-button"
+                type="button"
+                style="display: none;"
+        >
+            Cerrar sesión
+        </button>
+
+    </div>
+
+</header>
+<main>
+<section class="store-hero">
+ <div class="container">
+  <a class="store-back" href="index.html">← Volver al inicio</a>
+  <p class="hero-tag">EXPLORA A TU MANERA</p>
+  <h1>Encuentra tu próxima<br><span>pieza de tecnología.</span></h1>
+  <p class="hero-description">Para trabajar, jugar o conectar. Explora nuestras categorías y encuentra lo que va contigo.</p>
+ </div>
+</section>
+<section class="store-section container" aria-labelledby="categories-title">
+ <div class="section-header"><div><p class="eyebrow">ELIGE POR CATEGORÍA</p><h2 id="categories-title">¿Qué estás buscando?</h2></div></div>
+ <div id="category-list" class="category-grid" aria-label="Filtrar por categoría"></div>
+</section>
+<section class="store-results container" aria-labelledby="results-title" id="resultados">
+ <div class="section-header"><div><p class="eyebrow">CATÁLOGO TECHMARKET</p><h2 id="results-title">Todos los productos</h2><p id="results-count" role="status" aria-live="polite">Cargando catálogo...</p></div><button id="clear-category" type="button" class="secondary-button" hidden>Ver todos</button></div>
+ <div class="product-grid" id="product-grid" aria-busy="true"><p>Cargando productos...</p></div>
+ <button id="retry-products" type="button" class="secondary-button" hidden>Intentar de nuevo</button>
+ <noscript>Activa JavaScript para consultar y filtrar los productos.</noscript>
+</section></main>
+<footer class="footer">
+
+    <div class="footer-content">
+
+        <div class="footer-brand">
+            <h2>TechMarket</h2>
+
+            <p>
+                Tu marketplace tecnológico.
+                Tecnología que quieres, todo en un solo lugar.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <a href="index.html#productos">Productos</a>
+            <a href="categories.html">Categorías</a>
+            <a href="about.html">Nosotros</a>
+            <a href="cart.html">Mi carrito</a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+
+</footer>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/store-cart.js"></script>
+<script src="js/categories.js"></script>
+</body>
+</html>

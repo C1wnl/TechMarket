@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nosotros | TechMarket</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/store-pages.css">
+</head>
+<body class="store-page">
+<header class="navbar">
+
+    <a href="index.html" class="logo">TechMarket</a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+        <a href="index.html#productos">Productos</a>
+        <a href="categories.html">Categorías</a>
+        <a href="about.html" aria-current="page">Nosotros</a>
+    </nav>
+
+    <div class="nav-actions">
+
+        <a href="cart.html" class="nav-cart-link" aria-label="Ver carrito de compras">
+            Carrito
+            <span class="nav-cart-count" id="cart-count">0</span>
+        </a>
+
+        <a href="login.html" class="login-link" id="login-link">
+            Iniciar sesión
+        </a>
+
+        <a href="register.html" class="register-button" id="register-link">
+            Crear cuenta
+        </a>
+
+        <a href="profile.html" class="register-button" id="account-link"
+           style="display: none;">
+            Mi perfil
+        </a>
+
+        <button
+                id="logout-button"
+                class="logout-button"
+                type="button"
+                style="display: none;"
+        >
+            Cerrar sesión
+        </button>
+
+    </div>
+
+</header>
+<main>
+<section class="store-hero">
+ <div class="container">
+  <a class="store-back" href="index.html">← Volver al inicio</a>
+  <p class="hero-tag">SOMOS TECHMARKET</p>
+  <h1>La tecnología nos conecta.<br><span>Las ideas nos mueven.</span></h1>
+  <p class="hero-description">Un marketplace que reúne tecnología en un solo lugar, con una experiencia clara, práctica y fácil de explorar.</p>
+  <div class="hero-actions"><a class="primary-button" href="index.html#productos">Explorar productos →</a><a class="secondary-button" href="categories.html">Ver categorías</a></div>
+ </div>
+</section>
+<section class="store-section container about-intro" aria-labelledby="about-title">
+ <div><p class="eyebrow">NUESTRA HISTORIA</p><h2 id="about-title">Una idea en común.<br>Un proyecto en equipo.</h2></div>
+ <div class="about-copy"><p>TechMarket nace como un proyecto universitario para llevar lo aprendido en el aula a una experiencia de compra en línea.</p><p>Queremos que descubrir productos, consultar sus detalles y gestionar tus pedidos sea sencillo. Seguimos construyendo y mejorando la plataforma con ese propósito.</p></div>
+</section>
+<section class="container store-section about-values" aria-labelledby="values-title">
+ <div class="section-header"><div><p class="eyebrow">LO QUE NOS GUÍA</p><h2 id="values-title">Pensado para hacerlo simple.</h2></div></div>
+ <div class="about-grid">
+  <article class="about-card"><span class="about-number">01</span><h3>Claridad</h3><p>Información de productos, precios y disponibilidad en una experiencia fácil de entender.</p></article>
+  <article class="about-card"><span class="about-number">02</span><h3>Conexión</h3><p>Un mismo espacio para descubrir tecnología y dar seguimiento a tus compras.</p></article>
+  <article class="about-card"><span class="about-number">03</span><h3>Mejora continua</h3><p>Aprendemos, probamos y cuidamos cada detalle para seguir desarrollando TechMarket.</p></article>
+ </div>
+</section>
+<section class="container about-cta"><div><p class="eyebrow">TU PRÓXIMO DESCUBRIMIENTO</p><h2>Encuentra algo para ti.</h2><p>Empieza por lo que más te interesa.</p></div><a class="primary-button" href="categories.html">Explorar categorías →</a></section>
+</main>
+<footer class="footer">
+
+    <div class="footer-content">
+
+        <div class="footer-brand">
+            <h2>TechMarket</h2>
+
+            <p>
+                Tu marketplace tecnológico.
+                Tecnología que quieres, todo en un solo lugar.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <a href="index.html#productos">Productos</a>
+            <a href="categories.html">Categorías</a>
+            <a href="about.html">Nosotros</a>
+            <a href="cart.html">Mi carrito</a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 TechMarket. Todos los derechos reservados.</p>
+    </div>
+
+</footer>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/store-cart.js"></script>
+
+</body>
+</html>
